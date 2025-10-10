@@ -19,7 +19,10 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
         in vec2 aPos;
         in vec2 aTexCoord;
         out vec2 TexCoord;
-        void main() { gl_Position = vec4(aPos,0,1); TexCoord = aTexCoord; }
+        void main() { 
+            gl_Position = vec4(aPos,0,1); 
+            TexCoord = aTexCoord; 
+        }
     )";
 
     const char* fragmentShader = R"(
@@ -27,25 +30,34 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
         in vec2 TexCoord;
         out vec4 FragColor;
         uniform sampler2D screenTex;
-        uniform float brightness;
-        uniform float contrast;
+        uniform float brightness; // 0.0 - 2.0
+        uniform float contrast;   // -255 - 255
+
         void main() {
-            vec3 c = texture(screenTex, TexCoord).rgb;
-            c = (c - 0.5) * contrast + 0.5; // prosty wzór na kontrast
-            c *= brightness;
-            FragColor = vec4(c, 1.0);
+            vec3 color = texture(screenTex, TexCoord).rgb;
+
+            float factor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
+
+            color.r = clamp(factor * (color.r - 0.5) + 0.5, 0.0, 1.0);
+            color.g = clamp(factor * (color.g - 0.5) + 0.5, 0.0, 1.0);
+            color.b = clamp(factor * (color.b - 0.5) + 0.5, 0.0, 1.0);
+
+            color += brightness;
+
+            FragColor = vec4(color, 1.0);
         }
+
     )";
 
     shaderProgram = CreateShaderProgram(vertexShader, fragmentShader);
 
     float vertices[] = {
-        -1.0f,  1.0f,   0.0f, 0.0f,
-        -1.0f, -1.0f,   0.0f, 1.0f,
-         1.0f, -1.0f,   1.0f, 1.0f,
-         1.0f,  1.0f,   1.0f, 0.0f
+        -1.0f,  1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, 1.0f, 1.0f,
+         1.0f,  1.0f, 1.0f, 0.0f
     };
-    unsigned int indices[] = { 0, 1, 2, 0, 2, 3 };
+    unsigned int indices[] = { 0, 1, 2,  0, 2, 3 };
 
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -66,7 +78,7 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
         return false;
 
-    CaptureScreenToPackedBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
+    CaptureScreenToBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
 
     if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
         return false;
@@ -91,7 +103,7 @@ void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
 
     if (now - lastCapture >= captureInterval){
         lastCapture = now;
-        CaptureScreenToPackedBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
+        CaptureScreenToBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
 
         if (wglMakeCurrent(HDCOverlay, GLContextOverlay)){
             if (!screenPacked.empty()){
@@ -101,7 +113,6 @@ void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
                     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
                     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
                 }
                 else{
@@ -218,9 +229,7 @@ GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs){
     return prog;
 }
 
-void Renderer::CaptureScreenToPackedBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI){
-    bool overlayWasVisible = false;
-    bool guiWasVisible = false;
+void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI){
 
     HDC hdcScreen = GetDC(nullptr);
     HDC hdcMem = CreateCompatibleDC(hdcScreen);

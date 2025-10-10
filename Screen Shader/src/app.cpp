@@ -32,14 +32,6 @@ LRESULT CALLBACK App::GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT CALLBACK App::CaptureWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
-    switch (uMsg) {
-        case WM_DESTROY:
-            return 0;
-    }
-    return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-
 int App::Run(){
     const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -76,7 +68,8 @@ int App::Run(){
     RegisterClass(&wcGUI);
 
     hwndGUI = CreateWindowEx(
-        WS_EX_TOPMOST, GUI_CLASS, L"Ustawienia", WS_POPUP,
+        WS_EX_TOPMOST, 
+        GUI_CLASS, L"Ustawienia", WS_POPUP,
         screenWidth / 2 + 200, screenHeight / 2 - 200, 300, 500,
         nullptr, nullptr, hInstance, nullptr
     );
@@ -84,23 +77,6 @@ int App::Run(){
 
     SetWindowDisplayAffinity(hwndOverlay, WDA_EXCLUDEFROMCAPTURE);
     SetWindowDisplayAffinity(hwndGUI, WDA_EXCLUDEFROMCAPTURE);
-
-
-    //klasa przechwycenia ekranu
-    WNDCLASS wcCapture = {};
-    wcCapture.lpfnWndProc = CaptureWndProc;
-    wcCapture.hInstance = hInstance;
-    wcCapture.lpszClassName = CAPTURE_CLASS;
-    RegisterClass(&wcCapture);
-
-    hwndCapture = CreateWindowEx(
-        WS_EX_TOOLWINDOW, CAPTURE_CLASS, L"Capture", WS_POPUP,
-        0, 0, screenWidth, screenHeight,
-        nullptr, nullptr, hInstance, nullptr
-    );
-    SetLayeredWindowAttributes(hwndCapture, 0, 0, LWA_ALPHA);
-    SetWindowPos(hwndCapture, HWND_BOTTOM, 0, 0, screenWidth, screenHeight, SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
 
     if (!renderer.Init(hwndOverlay, hwndGUI, screenWidth, screenHeight)) {
         MessageBox(hwndOverlay, L"Renderer init failed", L"Error", MB_OK);

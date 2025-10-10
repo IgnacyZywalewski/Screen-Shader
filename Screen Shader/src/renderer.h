@@ -18,7 +18,7 @@ public:
 private:
     GLuint CompileShader(GLenum type, const char* src);
     GLuint CreateShaderProgram(const char* vs, const char* fs);
-    void CaptureScreenToPackedBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI);
+    void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI);
 
     HGLRC GLContextGUI = nullptr;
     HDC HDCGUI = nullptr;
@@ -29,8 +29,8 @@ private:
     GLuint shaderProgram = 0;
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
-    float brightness = 1.0f;
-    float contrast = 1.0f;
+    float brightness = 0.0f;
+    float contrast = 0.0f;
 
     std::vector<BYTE> screenPacked;
 
