@@ -85,8 +85,8 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
 }
 
 void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
-    DWORD lastCapture = GetTickCount64();
-    const DWORD captureInterval = 8;
+    static DWORD lastCapture = GetTickCount64();
+    const DWORD captureInterval = 16;
     DWORD now = GetTickCount64();
 
     if (now - lastCapture >= captureInterval){
@@ -141,17 +141,22 @@ void Renderer::RenderOverlay(){
 void Renderer::Close(HWND hwndOverlay, HWND hwndGUI){
     wglMakeCurrent(HDCOverlay, GLContextOverlay);
 
-    if (screenTexture) glDeleteTextures(1, &screenTexture);
+    if (screenTexture) 
+        glDeleteTextures(1, &screenTexture);
     glDeleteProgram(shaderProgram);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
 
     wglMakeCurrent(NULL, NULL);
-    if (GLContextGUI) wglDeleteContext(GLContextGUI);
-    if (GLContextOverlay) wglDeleteContext(GLContextOverlay);
-    if (HDCGUI) ReleaseDC(hwndGUI, HDCGUI);
-    if (HDCOverlay) ReleaseDC(hwndOverlay, HDCOverlay);
+    if (GLContextGUI) 
+        wglDeleteContext(GLContextGUI);
+    if (GLContextOverlay) 
+        wglDeleteContext(GLContextOverlay);
+    if (HDCGUI) 
+        ReleaseDC(hwndGUI, HDCGUI);
+    if (HDCOverlay) 
+        ReleaseDC(hwndOverlay, HDCOverlay);
 }
 
 bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext){
@@ -169,15 +174,11 @@ bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext){
 
     if (pf == 0) 
         return false;
-
     if (!SetPixelFormat(outHDC, pf, &pfd)) 
         return false;
-
     outContext = wglCreateContext(outHDC);
-
     if (!outContext) 
         return false;
-
     if (!wglMakeCurrent(outHDC, outContext)) 
         return false;
 
@@ -257,7 +258,8 @@ void Renderer::CaptureScreenToPackedBGR(std::vector<BYTE>& outPacked, int width,
     }
 
     outPacked.resize(width * height * 3);
-    for (int y = 0; y < height; ++y)
+
+    for (int y = 0; y < height; y++)
         memcpy(&outPacked[y * width * 3], &tmp[y * stride], width * 3);
 
     SelectObject(hdcMem, hOld);

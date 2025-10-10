@@ -56,12 +56,14 @@ int App::Run(){
     RegisterClass(&wcOverlay);
 
     hwndOverlay = CreateWindowEx(
-        WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE,
+        WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
         OVERLAY_CLASS, L"Overlay", WS_POPUP,
         0, 0, screenWidth, screenHeight,
         nullptr, nullptr, hInstance, nullptr
     );
-    SetWindowPos(hwndOverlay, HWND_TOPMOST, 0, 0, screenWidth, screenHeight, SWP_NOACTIVATE | SWP_SHOWWINDOW);
+
+    SetWindowPos(hwndOverlay, HWND_TOPMOST, 0, 0, screenWidth, screenHeight,
+        SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
     SetLayeredWindowAttributes(hwndOverlay, 0, 255, LWA_ALPHA);
     ShowWindow(hwndOverlay, SW_SHOW);
 

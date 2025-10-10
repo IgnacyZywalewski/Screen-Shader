@@ -43,7 +43,7 @@ void GUI::Render(HWND hwnd, float& brightness, float& contrast)
     if (ImGui::Button("X")) PostQuitMessage(0);
 
     ImGui::SliderFloat("Brightness", &brightness, 0.0f, 2.0f);
-    ImGui::SliderFloat("Contrast", &contrast, 0.0f, 2.0f);
+    ImGui::SliderFloat("Contrast", &contrast, 0.5f, 1.5f);
 
     static POINT dragOffset = { 0,0 };
     if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) {
