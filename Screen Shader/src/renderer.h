@@ -3,6 +3,18 @@
 #include <vector>
 #include <glad/glad.h>
 
+struct ShadersData {
+    float brightness = 1.0f;
+    float gamma = 1.0f;
+    float contrast = 0.0f;
+    
+    bool colorInversion = false;
+
+    bool redColor = true;
+    bool greenColor = true;
+    bool blueColor = true;
+};
+
 class Renderer {
 public:
     bool Init(HWND hwndOverlay, HWND hwndGUI, int width, int height);
@@ -11,9 +23,11 @@ public:
     void Close(HWND hwndOverlay, HWND hwndGUI);
     bool InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext);
 
-    float& GetBrightness() { return brightness; }
+    ShadersData shadersData;
+    /*float& GetBrightness() { return brightness; }
     float& GetContrast() { return contrast; }
     float& GetGamma() { return gamma; }
+    bool& GetColorInversion() { return colorInversion; }*/
     
 
 private:
@@ -29,10 +43,6 @@ private:
     GLuint screenTexture = 0;
     GLuint shaderProgram = 0;
     GLuint VAO = 0, VBO = 0, EBO = 0;
-
-    float brightness = 1.0f;
-    float contrast = 0.0f;
-    float gamma = 1.0f;
 
     std::vector<BYTE> screenPacked;
 

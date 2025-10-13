@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include "imgui/IconsFontAwesome6.h"
 
-
 void GUI::Init(HWND hwnd, Renderer& renderer)
 {
     if (!renderer.InitOpenGL(hwnd, HDCGUI, GLContextGUI)){
@@ -33,7 +32,7 @@ void GUI::Init(HWND hwnd, Renderer& renderer)
     io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAS, iconFontSize, &icons_config, icons_ranges);
 }
 
-void GUI::Render(HWND hwnd, float& brightness, float& contrast, float& gamma)
+void GUI::Render(HWND hwnd, ShadersData& shadersData)
 {
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_NewFrame();
@@ -74,25 +73,12 @@ void GUI::Render(HWND hwnd, float& brightness, float& contrast, float& gamma)
     ImGui::SameLine(labelWidth);
 
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##brightness_slider", &brightness, 0.0f, 2.0f);
+    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.2f, 3.0f);
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(resetButtonWidth, 0)))
-        brightness = 1.0f;
-
-    // contrast
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("Contrast");
-    ImGui::SameLine(labelWidth);
-
-    ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##contrast_slider", &contrast, -255.0f, 255.0f);
-    ImGui::PopItemWidth();
-
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(resetButtonWidth, 0)))
-        contrast = 0.0f;
+        shadersData.brightness = 1.0f;
 
     // gamma
     ImGui::AlignTextToFramePadding();
@@ -100,12 +86,48 @@ void GUI::Render(HWND hwnd, float& brightness, float& contrast, float& gamma)
     ImGui::SameLine(labelWidth);
 
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##gamma_slider", &gamma, 0.0f, 8.0f);
+    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 5.0f);
     ImGui::PopItemWidth();
 
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(resetButtonWidth, 0)))
-        gamma = 1.0f;
+        shadersData.gamma = 1.0f;
+
+    // contrast
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Contrast");
+    ImGui::SameLine(labelWidth);
+
+    ImGui::PushItemWidth(sliderWidth);
+    ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -255.0f, 255.0f);
+    ImGui::PopItemWidth();
+
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(resetButtonWidth, 0)))
+        shadersData.contrast = 0.0f;
+    ImGui::NewLine();
+
+    //inwersja kolorow
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Invert colors");
+    ImGui::SameLine();
+    ImGui::Checkbox("##color_inversion_checkbox", &shadersData.colorInversion);
+    ImGui::NewLine();
+
+    //kolory rgb
+    ImGui::Text("Red");
+    ImGui::SameLine();
+    ImGui::Checkbox("##red_color_checkbox", &shadersData.redColor);
+    ImGui::SameLine();
+
+    ImGui::Text("Green");
+    ImGui::SameLine();
+    ImGui::Checkbox("##green_color_checkbox", &shadersData.greenColor);
+    ImGui::SameLine();
+
+    ImGui::Text("Blue");
+    ImGui::SameLine();
+    ImGui::Checkbox("##blue_color_checkbox", &shadersData.blueColor);
 
     //przeciaganie
     static POINT dragOffset = { 0,0 };

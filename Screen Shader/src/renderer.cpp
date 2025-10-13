@@ -34,6 +34,10 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
         uniform float brightness; // 0.0  2.0
         uniform float contrast;   // -255  255
         uniform float gamma;      // 0.0   8.0
+        uniform bool colorInversion;
+        uniform bool redColor;
+        uniform bool greenColor;
+        uniform bool blueColor;
 
         void main() {
             vec3 color = texture(screenTex, TexCoord).rgb;
@@ -48,6 +52,19 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
             //gamma
             //float gammaCorrection = 1.0 / gamma;
             color = pow(color, vec3(1.0 / gamma));
+
+            //inwersja kolorow
+            if(colorInversion)
+                color = 1 - color;
+
+            //kolory rgb
+            if(!redColor)
+                color.r = 0;
+            if(!greenColor)
+                color.g = 0;
+            if(!blueColor)
+                color.b = 0;
+            
 
             FragColor = vec4(color, 1.0);
         }
@@ -140,9 +157,13 @@ void Renderer::RenderOverlay(){
     if (screenTexture != 0){
         glUseProgram(shaderProgram);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), brightness);
-        glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), contrast);
-        glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), gamma);
+        glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
+        glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
+        glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
+        glUniform1f(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
+        glUniform1f(glGetUniformLocation(shaderProgram, "redColor"), shadersData.redColor);
+        glUniform1f(glGetUniformLocation(shaderProgram, "greenColor"), shadersData.greenColor);
+        glUniform1f(glGetUniformLocation(shaderProgram, "blueColor"), shadersData.blueColor);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);

@@ -96,7 +96,7 @@ int App::Run(){
 
         renderer.Update(hwndOverlay, hwndGUI);
         renderer.RenderOverlay();
-        gui.Render(hwndGUI, renderer.GetBrightness(), renderer.GetContrast(), renderer.GetGamma());
+        gui.Render(hwndGUI, renderer.shadersData);
     }
 
     gui.Close();
