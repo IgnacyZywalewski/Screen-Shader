@@ -48,6 +48,9 @@
     <ClInclude Include="src\gui.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\IconsFontAwesome6.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -86,5 +89,10 @@
     <ClCompile Include="src\gui.cpp">
       <Filter>src</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="imgui\fa-solid-900.ttf">
+      <Filter>imgui</Filter>
+    </Font>
   </ItemGroup>
 </Project>

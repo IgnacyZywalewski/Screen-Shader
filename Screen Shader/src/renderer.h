@@ -13,6 +13,7 @@ public:
 
     float& GetBrightness() { return brightness; }
     float& GetContrast() { return contrast; }
+    float& GetGamma() { return gamma; }
     
 
 private:
@@ -29,8 +30,9 @@ private:
     GLuint shaderProgram = 0;
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
-    float brightness = 0.0f;
+    float brightness = 1.0f;
     float contrast = 0.0f;
+    float gamma = 1.0f;
 
     std::vector<BYTE> screenPacked;
 

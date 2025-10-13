@@ -70,7 +70,7 @@ int App::Run(){
     hwndGUI = CreateWindowEx(
         WS_EX_TOPMOST, 
         GUI_CLASS, L"Ustawienia", WS_POPUP,
-        screenWidth / 2 + 200, screenHeight / 2 - 200, 300, 500,
+        screenWidth / 2 + 300, screenHeight / 2 - 300, 350, 500,
         nullptr, nullptr, hInstance, nullptr
     );
     ShowWindow(hwndGUI, SW_SHOW);
@@ -96,7 +96,7 @@ int App::Run(){
 
         renderer.Update(hwndOverlay, hwndGUI);
         renderer.RenderOverlay();
-        gui.Render(hwndGUI, renderer.GetBrightness(), renderer.GetContrast());
+        gui.Render(hwndGUI, renderer.GetBrightness(), renderer.GetContrast(), renderer.GetGamma());
     }
 
     gui.Close();

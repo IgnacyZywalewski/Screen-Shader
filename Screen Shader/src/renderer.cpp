@@ -30,19 +30,24 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
         in vec2 TexCoord;
         out vec4 FragColor;
         uniform sampler2D screenTex;
-        uniform float brightness; // 0.0 - 2.0
-        uniform float contrast;   // -255 - 255
+
+        uniform float brightness; // 0.0  2.0
+        uniform float contrast;   // -255  255
+        uniform float gamma;      // 0.0   8.0
 
         void main() {
             vec3 color = texture(screenTex, TexCoord).rgb;
 
-            float factor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
+            //jasnosc
+            color *= brightness;
 
-            color.r = clamp(factor * (color.r - 0.5) + 0.5, 0.0, 1.0);
-            color.g = clamp(factor * (color.g - 0.5) + 0.5, 0.0, 1.0);
-            color.b = clamp(factor * (color.b - 0.5) + 0.5, 0.0, 1.0);
+            //kontrast
+            float contrastFactor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
+            color = clamp(contrastFactor * (color - 0.5) + 0.5, 0.0, 1.0);
 
-            color += brightness;
+            //gamma
+            //float gammaCorrection = 1.0 / gamma;
+            color = pow(color, vec3(1.0 / gamma));
 
             FragColor = vec4(color, 1.0);
         }
@@ -98,7 +103,7 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
 
 void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
     static DWORD lastCapture = GetTickCount64();
-    const DWORD captureInterval = 16;
+    const DWORD captureInterval = 8;
     DWORD now = GetTickCount64();
 
     if (now - lastCapture >= captureInterval){
@@ -134,8 +139,10 @@ void Renderer::RenderOverlay(){
 
     if (screenTexture != 0){
         glUseProgram(shaderProgram);
+
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), contrast);
+        glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), gamma);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);

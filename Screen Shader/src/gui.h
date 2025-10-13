@@ -9,7 +9,7 @@ class Renderer;
 class GUI{
 public:
     void Init(HWND hwnd, Renderer& renderer);
-    void Render(HWND hwnd, float& brightness, float& contrast);
+    void Render(HWND hwnd, float& brightness, float& contrast, float& gamma);
     void Close();
 
 private:
