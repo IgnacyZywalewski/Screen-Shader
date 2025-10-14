@@ -48,8 +48,8 @@
     <ClInclude Include="src\gui.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\IconsFontAwesome6.h">
-      <Filter>imgui</Filter>
+    <ClInclude Include="assets\IconsFontAwesome6.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -91,8 +91,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Font Include="imgui\fa-solid-900.ttf">
-      <Filter>imgui</Filter>
+    <None Include="shaders\screen_shader.frag">
+      <Filter>src</Filter>
+    </None>
+    <None Include="shaders\screen_shader.vert">
+      <Filter>src</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\fa-solid-900.ttf">
+      <Filter>src</Filter>
     </Font>
   </ItemGroup>
 </Project>

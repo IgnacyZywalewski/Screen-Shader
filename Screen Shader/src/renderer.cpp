@@ -1,8 +1,23 @@
-#include "renderer.h"
 #include <cassert>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#include "renderer.h"
 #include <glad/glad.h>
 #include <Windows.h>
+
+std::string LoadShaderFromFile(const char* path) {
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    if (!file) {
+        MessageBoxA(nullptr, (std::string("Nie mo¿na otworzyæ pliku shadera: ") + path).c_str(), "B³¹d", MB_OK);
+        return "";
+    }
+    std::ostringstream contents;
+    contents << file.rdbuf();
+    return contents.str();
+}
 
 bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     screenWidth = width;
@@ -14,64 +29,9 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     if (!gladLoadGL())
         return false;
 
-    const char* vertexShader = R"(
-        #version 130
-        in vec2 aPos;
-        in vec2 aTexCoord;
-        out vec2 TexCoord;
-        void main() { 
-            gl_Position = vec4(aPos,0,1); 
-            TexCoord = aTexCoord; 
-        }
-    )";
-
-    const char* fragmentShader = R"(
-        #version 130
-        in vec2 TexCoord;
-        out vec4 FragColor;
-        uniform sampler2D screenTex;
-
-        uniform float brightness; // 0.0  2.0
-        uniform float contrast;   // -255  255
-        uniform float gamma;      // 0.0   8.0
-        uniform bool colorInversion;
-        uniform bool redColor;
-        uniform bool greenColor;
-        uniform bool blueColor;
-
-        void main() {
-            vec3 color = texture(screenTex, TexCoord).rgb;
-
-            //jasnosc
-            color *= brightness;
-
-            //kontrast
-            float contrastFactor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
-            color = clamp(contrastFactor * (color - 0.5) + 0.5, 0.0, 1.0);
-
-            //gamma
-            //float gammaCorrection = 1.0 / gamma;
-            color = pow(color, vec3(1.0 / gamma));
-
-            //inwersja kolorow
-            if(colorInversion)
-                color = 1 - color;
-
-            //kolory rgb
-            if(!redColor)
-                color.r = 0;
-            if(!greenColor)
-                color.g = 0;
-            if(!blueColor)
-                color.b = 0;
-            
-
-            FragColor = vec4(color, 1.0);
-        }
-
-    )";
-
-    shaderProgram = CreateShaderProgram(vertexShader, fragmentShader);
+    std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
+    std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
+    shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
 
     float vertices[] = {
         -1.0f,  1.0f, 0.0f, 0.0f,
@@ -119,9 +79,9 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
 }
 
 void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
-    static DWORD lastCapture = GetTickCount64();
-    const DWORD captureInterval = 8;
-    DWORD now = GetTickCount64();
+    static ULONGLONG lastCapture = GetTickCount64();
+    const ULONGLONG captureInterval = 8;
+    ULONGLONG now = GetTickCount64();
 
     if (now - lastCapture >= captureInterval){
         lastCapture = now;

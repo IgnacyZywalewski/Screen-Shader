@@ -1,7 +1,7 @@
 ﻿#include "gui.h"
 #include "renderer.h"
 #include <glad/glad.h>
-#include "imgui/IconsFontAwesome6.h"
+#include "assets/IconsFontAwesome6.h"
 
 void GUI::Init(HWND hwnd, Renderer& renderer)
 {
