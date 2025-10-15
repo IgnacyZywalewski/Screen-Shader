@@ -60,7 +60,7 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
         return false;
 
-    CaptureScreenToBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
+    CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
 
     if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
         return false;
@@ -78,14 +78,14 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     return true;
 }
 
-void Renderer::Update(HWND hwndOverlay, HWND hwndGUI){
+void Renderer::Update(){
     static ULONGLONG lastCapture = GetTickCount64();
     const ULONGLONG captureInterval = 8;
     ULONGLONG now = GetTickCount64();
 
     if (now - lastCapture >= captureInterval){
         lastCapture = now;
-        CaptureScreenToBGR(screenPacked, screenWidth, screenHeight, hwndOverlay, hwndGUI);
+        CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
 
         if (wglMakeCurrent(HDCOverlay, GLContextOverlay)){
             if (!screenPacked.empty()){
@@ -118,12 +118,16 @@ void Renderer::RenderOverlay(){
         glUseProgram(shaderProgram);
 
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
-        glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
+        glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
+        
         glUniform1f(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
+        
         glUniform1f(glGetUniformLocation(shaderProgram, "redColor"), shadersData.redColor);
         glUniform1f(glGetUniformLocation(shaderProgram, "greenColor"), shadersData.greenColor);
         glUniform1f(glGetUniformLocation(shaderProgram, "blueColor"), shadersData.blueColor);
+        
+        glUniform1f(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
@@ -142,6 +146,7 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI){
 
     if (screenTexture) 
         glDeleteTextures(1, &screenTexture);
+
     glDeleteProgram(shaderProgram);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
@@ -217,7 +222,7 @@ GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs){
     return prog;
 }
 
-void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI){
+void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height){
 
     HDC hdcScreen = GetDC(nullptr);
     HDC hdcMem = CreateCompatibleDC(hdcScreen);

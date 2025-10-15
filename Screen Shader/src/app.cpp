@@ -38,7 +38,6 @@ int App::Run(){
 
     const wchar_t OVERLAY_CLASS[] = L"OverlayWindowClass";
     const wchar_t GUI_CLASS[] = L"GUIWindowClass";
-    const wchar_t CAPTURE_CLASS[] = L"CaptureWindowClass";
 
     // klasa nakladki
     WNDCLASS wcOverlay = {};
@@ -54,8 +53,6 @@ int App::Run(){
         nullptr, nullptr, hInstance, nullptr
     );
 
-    SetWindowPos(hwndOverlay, HWND_TOPMOST, 0, 0, screenWidth, screenHeight,
-        SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE | SWP_NOOWNERZORDER);
     SetLayeredWindowAttributes(hwndOverlay, 0, 255, LWA_ALPHA);
     ShowWindow(hwndOverlay, SW_SHOW);
 
@@ -94,7 +91,7 @@ int App::Run(){
             if (msg.message == WM_QUIT) running = false;
         }
 
-        renderer.Update(hwndOverlay, hwndGUI);
+        renderer.Update();
         renderer.RenderOverlay();
         gui.Render(hwndGUI, renderer.shadersData);
     }

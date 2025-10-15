@@ -128,6 +128,14 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Blue");
     ImGui::SameLine();
     ImGui::Checkbox("##blue_color_checkbox", &shadersData.blueColor);
+    ImGui::NewLine();
+
+
+    //filtr czarno-bialy
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Black-White filter");
+    ImGui::SameLine();
+    ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
 
     //przeciaganie
     static POINT dragOffset = { 0,0 };

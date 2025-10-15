@@ -13,27 +13,24 @@ struct ShadersData {
     bool redColor = true;
     bool greenColor = true;
     bool blueColor = true;
+
+    bool blackWhite = false;
 };
 
 class Renderer {
 public:
     bool Init(HWND hwndOverlay, HWND hwndGUI, int width, int height);
-    void Update(HWND hwndOverlay, HWND hwndGUI);
+    void Update();
     void RenderOverlay();
     void Close(HWND hwndOverlay, HWND hwndGUI);
     bool InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext);
 
     ShadersData shadersData;
-    /*float& GetBrightness() { return brightness; }
-    float& GetContrast() { return contrast; }
-    float& GetGamma() { return gamma; }
-    bool& GetColorInversion() { return colorInversion; }*/
-    
 
 private:
     GLuint CompileShader(GLenum type, const char* src);
     GLuint CreateShaderProgram(const char* vs, const char* fs);
-    void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height, HWND hwndOverlay, HWND hwndGUI);
+    void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height);
 
     HGLRC GLContextGUI = nullptr;
     HDC HDCGUI = nullptr;
