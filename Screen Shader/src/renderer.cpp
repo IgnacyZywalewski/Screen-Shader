@@ -129,6 +129,9 @@ void Renderer::RenderOverlay(){
         
         glUniform1f(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
 
+        glUniform1f(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.hotizontalSwap);
+        glUniform1f(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
         glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);

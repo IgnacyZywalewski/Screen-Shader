@@ -44,4 +44,5 @@ void main() {
         color = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
 
     FragColor = vec4(color, 1.0);
+
 }

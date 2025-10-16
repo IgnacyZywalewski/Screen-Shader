@@ -15,6 +15,9 @@ struct ShadersData {
     bool blueColor = true;
 
     bool blackWhite = false;
+
+    bool hotizontalSwap = false;
+    bool verticalSwap = false;
 };
 
 class Renderer {

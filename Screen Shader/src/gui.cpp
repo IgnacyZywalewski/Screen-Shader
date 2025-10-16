@@ -71,11 +71,9 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Brightness");
     ImGui::SameLine(labelWidth);
-
     ImGui::PushItemWidth(sliderWidth);
     ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.2f, 3.0f);
     ImGui::PopItemWidth();
-
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(resetButtonWidth, 0)))
         shadersData.brightness = 1.0f;
@@ -84,11 +82,9 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Gamma");
     ImGui::SameLine(labelWidth);
-
     ImGui::PushItemWidth(sliderWidth);
     ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 5.0f);
     ImGui::PopItemWidth();
-
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(resetButtonWidth, 0)))
         shadersData.gamma = 1.0f;
@@ -97,11 +93,9 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Contrast");
     ImGui::SameLine(labelWidth);
-
     ImGui::PushItemWidth(sliderWidth);
     ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -255.0f, 255.0f);
     ImGui::PopItemWidth();
-
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(resetButtonWidth, 0)))
         shadersData.contrast = 0.0f;
@@ -130,12 +124,27 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Checkbox("##blue_color_checkbox", &shadersData.blueColor);
     ImGui::NewLine();
 
-
     //filtr czarno-bialy
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Black-White filter");
     ImGui::SameLine();
     ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
+    ImGui::NewLine();
+
+    //zamiana hotyzontalna
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Horizontal Swap");
+    ImGui::SameLine();
+    ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.hotizontalSwap);
+    //ImGui::SameLine();
+
+    //zamiana wertykalna
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Vertical Swap");
+    ImGui::SameLine();
+    ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
+    ImGui::NewLine();
+
 
     //przeciaganie
     static POINT dragOffset = { 0,0 };
