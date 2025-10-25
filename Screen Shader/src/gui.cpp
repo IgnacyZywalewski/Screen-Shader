@@ -64,8 +64,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     }
 
     float labelWidth = 90.0f;
-    float resetButtonWidth = 30.0f;
-    float sliderWidth = ImGui::GetWindowWidth() - labelWidth - resetButtonWidth - 20.0f;
+    float buttonWidth = 30.0f;
+    float sliderWidth = ImGui::GetWindowWidth() - labelWidth - buttonWidth - 20.0f;
 
     //jasnosc
     ImGui::AlignTextToFramePadding();
@@ -75,7 +75,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.2f, 3.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(resetButtonWidth, 0)))
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(buttonWidth, 0)))
         shadersData.brightness = 1.0f;
 
     // gamma
@@ -86,7 +86,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 5.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(resetButtonWidth, 0)))
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(buttonWidth, 0)))
         shadersData.gamma = 1.0f;
 
     // contrast
@@ -97,31 +97,57 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -255.0f, 255.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(resetButtonWidth, 0)))
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(buttonWidth, 0)))
         shadersData.contrast = 0.0f;
     ImGui::NewLine();
 
+    //kolory rgb
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Red");
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
+    ImGui::SliderFloat("##red_slider", &shadersData.redColor, 0.0f, 2.0f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_XMARK "##zero_red", ImVec2(buttonWidth, 0)))
+        shadersData.redColor = 0.0f;
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_red", ImVec2(buttonWidth, 0)))
+        shadersData.redColor = 1.0f;
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Green");
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
+    ImGui::SliderFloat("##green_slider", &shadersData.greenColor, 0.0f, 2.0f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_XMARK "##zero_green", ImVec2(buttonWidth, 0)))
+        shadersData.greenColor = 0.0f;
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_green", ImVec2(buttonWidth, 0)))
+        shadersData.greenColor = 1.0f;
+
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Blue");
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
+    ImGui::SliderFloat("##blue_slider", &shadersData.blueColor, 0.0f, 2.0f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_XMARK "##zero_blue", ImVec2(buttonWidth, 0)))
+        shadersData.blueColor = 0.0f;
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_blue", ImVec2(buttonWidth, 0)))
+        shadersData.blueColor = 1.0f;
+
+
     //inwersja kolorow
+    ImGui::NewLine();
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Invert colors");
     ImGui::SameLine();
     ImGui::Checkbox("##color_inversion_checkbox", &shadersData.colorInversion);
-    ImGui::NewLine();
-
-    //kolory rgb
-    ImGui::Text("Red");
-    ImGui::SameLine();
-    ImGui::Checkbox("##red_color_checkbox", &shadersData.redColor);
-    ImGui::SameLine();
-
-    ImGui::Text("Green");
-    ImGui::SameLine();
-    ImGui::Checkbox("##green_color_checkbox", &shadersData.greenColor);
-    ImGui::SameLine();
-
-    ImGui::Text("Blue");
-    ImGui::SameLine();
-    ImGui::Checkbox("##blue_color_checkbox", &shadersData.blueColor);
     ImGui::NewLine();
 
     //filtr czarno-bialy

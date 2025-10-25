@@ -10,9 +10,9 @@ struct ShadersData {
     
     bool colorInversion = false;
 
-    bool redColor = true;
-    bool greenColor = true;
-    bool blueColor = true;
+    float redColor = 1.0f;
+    float greenColor = 1.0f;
+    float blueColor = 1.0f;
 
     bool blackWhite = false;
 
