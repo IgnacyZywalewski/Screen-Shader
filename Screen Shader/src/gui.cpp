@@ -72,7 +72,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Brightness");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.2f, 3.0f);
+    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.0f, 4.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(buttonWidth, 0)))
@@ -83,13 +83,13 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Gamma");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 5.0f);
+    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 4.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(buttonWidth, 0)))
         shadersData.gamma = 1.0f;
 
-    // contrast
+    // kontrast
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Contrast");
     ImGui::SameLine(labelWidth);
@@ -99,6 +99,19 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(buttonWidth, 0)))
         shadersData.contrast = 0.0f;
+
+    // nasycenie
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Saturation");
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth);
+    ImGui::SliderFloat("##saturation_slider", &shadersData.saturation, 0.0f, 3.0f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_saturation", ImVec2(buttonWidth, 0)))
+        shadersData.saturation = 1.0f;
+
+
     ImGui::NewLine();
 
     //kolory rgb
@@ -106,40 +119,40 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Red");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##red_slider", &shadersData.redColor, 0.0f, 2.0f);
+    ImGui::SliderFloat("##red_slider", &shadersData.red, 0.0f, 2.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_red", ImVec2(buttonWidth, 0)))
-        shadersData.redColor = 0.0f;
+        shadersData.red = 0.0f;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_red", ImVec2(buttonWidth, 0)))
-        shadersData.redColor = 1.0f;
+        shadersData.red = 1.0f;
 
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Green");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##green_slider", &shadersData.greenColor, 0.0f, 2.0f);
+    ImGui::SliderFloat("##green_slider", &shadersData.green, 0.0f, 2.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_green", ImVec2(buttonWidth, 0)))
-        shadersData.greenColor = 0.0f;
+        shadersData.green = 0.0f;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_green", ImVec2(buttonWidth, 0)))
-        shadersData.greenColor = 1.0f;
+        shadersData.green = 1.0f;
 
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Blue");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##blue_slider", &shadersData.blueColor, 0.0f, 2.0f);
+    ImGui::SliderFloat("##blue_slider", &shadersData.blue, 0.0f, 2.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_blue", ImVec2(buttonWidth, 0)))
-        shadersData.blueColor = 0.0f;
+        shadersData.blue = 0.0f;
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_blue", ImVec2(buttonWidth, 0)))
-        shadersData.blueColor = 1.0f;
+        shadersData.blue = 1.0f;
 
 
     //inwersja kolorow
@@ -155,6 +168,10 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Black-White filter");
     ImGui::SameLine();
     ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
+    /*ImGui::SliderFloat("##black_white_value", &shadersData.blackWhiteValue, 0.0f, 1.0f);
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_black_white_value", ImVec2(buttonWidth, 0)))
+        shadersData.blackWhiteValue = 0.5f;*/
     ImGui::NewLine();
 
     //zamiana hotyzontalna

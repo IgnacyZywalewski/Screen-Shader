@@ -7,12 +7,13 @@ struct ShadersData {
     float brightness = 1.0f;
     float gamma = 1.0f;
     float contrast = 0.0f;
+    float saturation = 1.0f;
     
-    bool colorInversion = false;
+    float red = 1.0f;
+    float green = 1.0f;
+    float blue = 1.0f;
 
-    float redColor = 1.0f;
-    float greenColor = 1.0f;
-    float blueColor = 1.0f;
+    bool colorInversion = false;
 
     bool blackWhite = false;
 

@@ -78,6 +78,32 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height){
     return true;
 }
 
+bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
+    outHDC = GetDC(hwnd);
+    PIXELFORMATDESCRIPTOR pfd = {};
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
+    pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
+
+    int pf = ChoosePixelFormat(outHDC, &pfd);
+
+    if (pf == 0)
+        return false;
+    if (!SetPixelFormat(outHDC, pf, &pfd))
+        return false;
+    outContext = wglCreateContext(outHDC);
+    if (!outContext)
+        return false;
+    if (!wglMakeCurrent(outHDC, outContext))
+        return false;
+
+    return true;
+}
+
 void Renderer::Update(){
     static ULONGLONG lastCapture = GetTickCount64();
     const ULONGLONG captureInterval = 8;
@@ -120,12 +146,13 @@ void Renderer::RenderOverlay(){
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
+        glUniform1f(glGetUniformLocation(shaderProgram, "saturation"), shadersData.saturation);
         
         glUniform1f(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
         
-        glUniform1f(glGetUniformLocation(shaderProgram, "redColor"), shadersData.redColor);
-        glUniform1f(glGetUniformLocation(shaderProgram, "greenColor"), shadersData.greenColor);
-        glUniform1f(glGetUniformLocation(shaderProgram, "blueColor"), shadersData.blueColor);
+        glUniform1f(glGetUniformLocation(shaderProgram, "red"), shadersData.red);
+        glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
+        glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
         
         glUniform1f(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
 
@@ -142,6 +169,87 @@ void Renderer::RenderOverlay(){
     }
 
     SwapBuffers(HDCOverlay);
+}
+
+GLuint Renderer::CompileShader(GLenum type, const char* src) {
+    GLuint s = glCreateShader(type);
+    glShaderSource(s, 1, &src, nullptr);
+    glCompileShader(s);
+    GLint ok = 0;
+    glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
+    if (!ok) {
+        char buf[1024]; glGetShaderInfoLog(s, sizeof(buf), nullptr, buf);
+        MessageBoxA(nullptr, buf, "Shader compile error", MB_OK);
+    }
+    return s;
+}
+
+GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs) {
+    GLuint vsID = CompileShader(GL_VERTEX_SHADER, vs);
+    GLuint fsID = CompileShader(GL_FRAGMENT_SHADER, fs);
+    GLuint prog = glCreateProgram();
+    glAttachShader(prog, vsID);
+    glAttachShader(prog, fsID);
+    glBindAttribLocation(prog, 0, "aPos");
+    glBindAttribLocation(prog, 1, "aTexCoord");
+    glLinkProgram(prog);
+    GLint ok = 0;
+    glGetProgramiv(prog, GL_LINK_STATUS, &ok);
+    if (!ok) {
+        char buf[1024]; glGetProgramInfoLog(prog, sizeof(buf), nullptr, buf);
+        MessageBoxA(nullptr, buf, "Shader link error", MB_OK);
+    }
+    glDeleteShader(vsID);
+    glDeleteShader(fsID);
+    return prog;
+}
+
+void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height) {
+
+    HDC hdcScreen = GetDC(nullptr);
+    HDC hdcMem = CreateCompatibleDC(hdcScreen);
+    HBITMAP hBmp = CreateCompatibleBitmap(hdcScreen, width, height);
+    HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBmp);
+
+    if (!BitBlt(hdcMem, 0, 0, width, height, hdcScreen, 0, 0, SRCCOPY)) {
+        SelectObject(hdcMem, hOld);
+        DeleteObject(hBmp);
+        DeleteDC(hdcMem);
+        ReleaseDC(nullptr, hdcScreen);
+        outPacked.clear();
+        return;
+    }
+
+    BITMAPINFO bmi = {};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    int bytesPerPixel = 3;
+    int stride = ((width * bytesPerPixel + 3) / 4) * 4;
+    std::vector<BYTE> tmp(stride * height);
+
+    if (GetDIBits(hdcMem, hBmp, 0, height, tmp.data(), &bmi, DIB_RGB_COLORS) == 0) {
+        SelectObject(hdcMem, hOld);
+        DeleteObject(hBmp);
+        DeleteDC(hdcMem);
+        ReleaseDC(nullptr, hdcScreen);
+        outPacked.clear();
+        return;
+    }
+
+    outPacked.resize(width * height * 3);
+
+    for (int y = 0; y < height; y++)
+        memcpy(&outPacked[y * width * 3], &tmp[y * stride], width * 3);
+
+    SelectObject(hdcMem, hOld);
+    DeleteObject(hBmp);
+    DeleteDC(hdcMem);
+    ReleaseDC(nullptr, hdcScreen);
 }
 
 void Renderer::Close(HWND hwndOverlay, HWND hwndGUI){
@@ -164,111 +272,4 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI){
         ReleaseDC(hwndGUI, HDCGUI);
     if (HDCOverlay) 
         ReleaseDC(hwndOverlay, HDCOverlay);
-}
-
-bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext){
-    outHDC = GetDC(hwnd);
-    PIXELFORMATDESCRIPTOR pfd = {};
-    pfd.nSize = sizeof(pfd);
-    pfd.nVersion = 1;
-    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 32;
-    pfd.cDepthBits = 24;
-    pfd.cStencilBits = 8;
-
-    int pf = ChoosePixelFormat(outHDC, &pfd);
-
-    if (pf == 0) 
-        return false;
-    if (!SetPixelFormat(outHDC, pf, &pfd)) 
-        return false;
-    outContext = wglCreateContext(outHDC);
-    if (!outContext) 
-        return false;
-    if (!wglMakeCurrent(outHDC, outContext)) 
-        return false;
-
-    return true;
-}
-
-GLuint Renderer::CompileShader(GLenum type, const char* src){
-    GLuint s = glCreateShader(type);
-    glShaderSource(s, 1, &src, nullptr);
-    glCompileShader(s);
-    GLint ok = 0;
-    glGetShaderiv(s, GL_COMPILE_STATUS, &ok);
-    if (!ok){
-        char buf[1024]; glGetShaderInfoLog(s, sizeof(buf), nullptr, buf);
-        MessageBoxA(nullptr, buf, "Shader compile error", MB_OK);
-    }
-    return s;
-}
-
-GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs){
-    GLuint vsID = CompileShader(GL_VERTEX_SHADER, vs);
-    GLuint fsID = CompileShader(GL_FRAGMENT_SHADER, fs);
-    GLuint prog = glCreateProgram();
-    glAttachShader(prog, vsID);
-    glAttachShader(prog, fsID);
-    glBindAttribLocation(prog, 0, "aPos");
-    glBindAttribLocation(prog, 1, "aTexCoord");
-    glLinkProgram(prog);
-    GLint ok = 0;
-    glGetProgramiv(prog, GL_LINK_STATUS, &ok);
-    if (!ok){
-        char buf[1024]; glGetProgramInfoLog(prog, sizeof(buf), nullptr, buf);
-        MessageBoxA(nullptr, buf, "Shader link error", MB_OK);
-    }
-    glDeleteShader(vsID);
-    glDeleteShader(fsID);
-    return prog;
-}
-
-void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height){
-
-    HDC hdcScreen = GetDC(nullptr);
-    HDC hdcMem = CreateCompatibleDC(hdcScreen);
-    HBITMAP hBmp = CreateCompatibleBitmap(hdcScreen, width, height);
-    HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBmp);
-
-    if (!BitBlt(hdcMem, 0, 0, width, height, hdcScreen, 0, 0, SRCCOPY)){
-        SelectObject(hdcMem, hOld);
-        DeleteObject(hBmp);
-        DeleteDC(hdcMem);
-        ReleaseDC(nullptr, hdcScreen);
-        outPacked.clear();
-        return;
-    }
-
-    BITMAPINFO bmi = {};
-    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height;
-    bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 24;
-    bmi.bmiHeader.biCompression = BI_RGB;
-
-    int bytesPerPixel = 3;
-    int stride = ((width * bytesPerPixel + 3) / 4) * 4;
-    std::vector<BYTE> tmp(stride * height);
-
-    if (GetDIBits(hdcMem, hBmp, 0, height, tmp.data(), &bmi, DIB_RGB_COLORS) == 0){
-        SelectObject(hdcMem, hOld);
-        DeleteObject(hBmp);
-        DeleteDC(hdcMem);
-        ReleaseDC(nullptr, hdcScreen);
-        outPacked.clear();
-        return;
-    }
-
-    outPacked.resize(width * height * 3);
-
-    for (int y = 0; y < height; y++)
-        memcpy(&outPacked[y * width * 3], &tmp[y * stride], width * 3);
-
-    SelectObject(hdcMem, hOld);
-    DeleteObject(hBmp);
-    DeleteDC(hdcMem);
-    ReleaseDC(nullptr, hdcScreen);
 }
