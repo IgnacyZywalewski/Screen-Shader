@@ -1,7 +1,7 @@
 ﻿#include "gui.h"
 #include "renderer.h"
 #include <glad/glad.h>
-#include "assets/IconsFontAwesome6.h"
+#include "assets/icons_font_awesome_6.h"
 
 void GUI::Init(HWND hwnd, Renderer& renderer)
 {
@@ -12,11 +12,15 @@ void GUI::Init(HWND hwnd, Renderer& renderer)
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
 
+    if (!wglShareLists(renderer.GLContextOverlay, GLContextGUI)) {
+        MessageBox(hwnd, L"Nie udało się współdzielić kontekstów OpenGL!", L"Błąd", MB_OK);
+    }
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplOpenGL3_Init("#version 130");
+    ImGui_ImplOpenGL3_Init("#version 460");
 
     //czcionka
     ImGuiIO& io = ImGui::GetIO();
@@ -50,6 +54,22 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
         ImGuiWindowFlags_NoBringToFrontOnFocus
     );
     {
+        //przeciaganie
+        static POINT dragOffset = { 0,0 };
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) {
+            POINT p;
+            GetCursorPos(&p);
+            RECT r;
+            GetWindowRect(hwnd, &r);
+            dragOffset.x = p.x - r.left;
+            dragOffset.y = p.y - r.top;
+        }
+        if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) {
+            POINT p; GetCursorPos(&p);
+            SetWindowPos(hwnd, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        }
+
+
         ImGui::Text("Screen Shader");
 
         ImGui::SameLine(ImGui::GetWindowWidth() - 55);
@@ -110,8 +130,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_saturation", ImVec2(buttonWidth, 0)))
         shadersData.saturation = 1.0f;
-
-
     ImGui::NewLine();
 
     //kolory rgb
@@ -168,17 +186,13 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Black-White filter");
     ImGui::SameLine();
     ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
-    /*ImGui::SliderFloat("##black_white_value", &shadersData.blackWhiteValue, 0.0f, 1.0f);
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_black_white_value", ImVec2(buttonWidth, 0)))
-        shadersData.blackWhiteValue = 0.5f;*/
     ImGui::NewLine();
 
     //zamiana hotyzontalna
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Horizontal Swap");
     ImGui::SameLine();
-    ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.hotizontalSwap);
+    ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
     //ImGui::SameLine();
 
     //zamiana wertykalna
@@ -188,21 +202,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
     ImGui::NewLine();
 
-
-    //przeciaganie
-    static POINT dragOffset = { 0,0 };
-    if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(0)) {
-        POINT p;
-        GetCursorPos(&p);
-        RECT r;
-        GetWindowRect(hwnd, &r);
-        dragOffset.x = p.x - r.left;
-        dragOffset.y = p.y - r.top;
-    }
-    if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) {
-        POINT p; GetCursorPos(&p);
-        SetWindowPos(hwnd, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    }
 
     ImGui::End();
 

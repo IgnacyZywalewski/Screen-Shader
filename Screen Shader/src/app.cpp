@@ -32,7 +32,9 @@ LRESULT CALLBACK App::GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
+
 int App::Run(){
+
     const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -56,7 +58,6 @@ int App::Run(){
     SetLayeredWindowAttributes(hwndOverlay, 0, 255, LWA_ALPHA);
     ShowWindow(hwndOverlay, SW_SHOW);
 
-
     //klasa gui
     WNDCLASS wcGUI = {};
     wcGUI.lpfnWndProc = GUIWndProc;
@@ -74,6 +75,7 @@ int App::Run(){
 
     SetWindowDisplayAffinity(hwndOverlay, WDA_EXCLUDEFROMCAPTURE);
     SetWindowDisplayAffinity(hwndGUI, WDA_EXCLUDEFROMCAPTURE);
+
 
     if (!renderer.Init(hwndOverlay, hwndGUI, screenWidth, screenHeight)) {
         MessageBox(hwndOverlay, L"Renderer init failed", L"Error", MB_OK);
