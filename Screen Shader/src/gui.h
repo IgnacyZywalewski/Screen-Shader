@@ -7,7 +7,7 @@
 
 class GUI{
 public:
-    void Init(HWND hwnd, Renderer& renderer);
+    bool Init(HWND hwnd, Renderer& renderer);
     void Render(HWND hwnd, ShadersData& shadersData);
     void Close();
 

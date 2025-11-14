@@ -6,7 +6,7 @@
 class App {
 public:
     App(HINSTANCE hInstance);
-    int Run();
+    void Run();
 
 private:
     HINSTANCE hInstance;
@@ -17,7 +17,7 @@ private:
     HWND hwndGUI = nullptr;
 
     static bool running;
-
+    
     static LRESULT CALLBACK OverlayWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static LRESULT CALLBACK GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 };

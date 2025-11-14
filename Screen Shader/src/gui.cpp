@@ -3,24 +3,23 @@
 #include <glad/glad.h>
 #include "assets/icons_font_awesome_6.h"
 
-void GUI::Init(HWND hwnd, Renderer& renderer)
+bool GUI::Init(HWND hwnd, Renderer& renderer)
 {
     if (!renderer.InitOpenGL(hwnd, HDCGUI, GLContextGUI)){
-        MessageBox(hwnd, L"Init GUI OpenGL failed", L"Error", MB_OK);
-        return;
+        return false;
     }
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
 
-    if (!wglShareLists(renderer.GLContextOverlay, GLContextGUI)) {
+    /*if (!wglShareLists(renderer.GLContextOverlay, GLContextGUI)) {
         MessageBox(hwnd, L"Nie udało się współdzielić kontekstów OpenGL!", L"Błąd", MB_OK);
-    }
+    }*/
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplOpenGL3_Init("#version 460");
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     //czcionka
     ImGuiIO& io = ImGui::GetIO();
@@ -34,6 +33,8 @@ void GUI::Init(HWND hwnd, Renderer& renderer)
     icons_config.PixelSnapH = true;
     icons_config.GlyphMinAdvanceX = iconFontSize;
     io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAS, iconFontSize, &icons_config, icons_ranges);
+
+    return true;
 }
 
 void GUI::Render(HWND hwnd, ShadersData& shadersData)
@@ -65,7 +66,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
             dragOffset.y = p.y - r.top;
         }
         if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) {
-            POINT p; GetCursorPos(&p);
+            POINT p; 
+            GetCursorPos(&p);
             SetWindowPos(hwnd, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
         }
 

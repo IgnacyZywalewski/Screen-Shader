@@ -2,7 +2,6 @@
 #include <Windows.h>
 #include <vector>
 #include <glad/glad.h>
-#include "dxgi_capture.h"
 
 struct ShadersData {
     float brightness = 1.0f;
@@ -42,8 +41,6 @@ private:
     GLuint CreateShaderProgram(const char* vs, const char* fs);
     void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height);
 
-    
-
     GLuint screenTexture = 0;
     GLuint shaderProgram = 0;
     GLuint VAO = 0, VBO = 0, EBO = 0;
@@ -52,6 +49,4 @@ private:
 
     int screenWidth = 0;
     int screenHeight = 0;
-
-    DxgiCapture dxgi;
 };

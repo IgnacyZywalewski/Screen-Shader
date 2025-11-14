@@ -4,37 +4,37 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+App::App(HINSTANCE hInstance)
+    : hInstance(hInstance) {
+}
+
 bool App::running = true;
 
-App::App(HINSTANCE hInstance)
-    : hInstance(hInstance) {}
-
-LRESULT CALLBACK App::OverlayWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+LRESULT CALLBACK App::OverlayWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
-        case WM_DESTROY: return 0;
+    case WM_DESTROY: return 0;
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT CALLBACK App::GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+LRESULT CALLBACK App::GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (ImGui_ImplWin32_WndProcHandler(hwnd, uMsg, wParam, lParam))
         return true;
 
     switch (uMsg) {
-        case WM_CLOSE:
-            DestroyWindow(hwnd);
-            return 0;
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            running = false;
-            return 0;
+    case WM_CLOSE:
+        DestroyWindow(hwnd);
+        return 0;
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        running = false;
+        return 0;
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
 
-int App::Run(){
-
+void App::Run() {
     const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
     const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
@@ -58,6 +58,7 @@ int App::Run(){
     SetLayeredWindowAttributes(hwndOverlay, 0, 255, LWA_ALPHA);
     ShowWindow(hwndOverlay, SW_SHOW);
 
+
     //klasa gui
     WNDCLASS wcGUI = {};
     wcGUI.lpfnWndProc = GUIWndProc;
@@ -66,8 +67,8 @@ int App::Run(){
     RegisterClass(&wcGUI);
 
     hwndGUI = CreateWindowEx(
-        WS_EX_TOPMOST, 
-        GUI_CLASS, L"Ustawienia", WS_POPUP,
+        WS_EX_TOPMOST,
+        GUI_CLASS, L"Screen Shader", WS_POPUP,
         screenWidth / 2 + 300, screenHeight / 2 - 300, 350, 500,
         nullptr, nullptr, hInstance, nullptr
     );
@@ -79,15 +80,18 @@ int App::Run(){
 
     if (!renderer.Init(hwndOverlay, hwndGUI, screenWidth, screenHeight)) {
         MessageBox(hwndOverlay, L"Renderer init failed", L"Error", MB_OK);
-        return 0;
+        return;
     }
 
-    gui.Init(hwndGUI, renderer);
+    if (!gui.Init(hwndGUI, renderer)) {
+        MessageBox(hwndGUI, L"Init GUI OpenGL failed", L"Error", MB_OK);
+        return;
+    }
 
     //petla
     MSG msg = {};
-    while (running){
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)){
+    while (running) {
+        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
             if (msg.message == WM_QUIT) running = false;
@@ -101,5 +105,4 @@ int App::Run(){
     gui.Close();
     renderer.Close(hwndOverlay, hwndGUI);
 
-    return 0;
 }
