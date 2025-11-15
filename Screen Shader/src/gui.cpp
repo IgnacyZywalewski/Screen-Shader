@@ -116,7 +116,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Contrast");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -255.0f, 255.0f);
+    ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -50.0f, 50.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(buttonWidth, 0)))
@@ -174,7 +174,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_blue", ImVec2(buttonWidth, 0)))
         shadersData.blue = 1.0f;
 
-
     //inwersja kolorow
     ImGui::NewLine();
     ImGui::AlignTextToFramePadding();
@@ -195,7 +194,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Horizontal Swap");
     ImGui::SameLine();
     ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
-    //ImGui::SameLine();
 
     //zamiana wertykalna
     ImGui::AlignTextToFramePadding();
@@ -203,6 +201,19 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::SameLine();
     ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
     ImGui::NewLine();
+
+    //blur
+    ImGui::NewLine();
+    ImGui::Text("Blur");
+    ImGui::SameLine();
+    ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth);
+    ImGui::SliderFloat("##blur_radius_slider", &shadersData.blurRadius, 1.0f, 5.0f);
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(buttonWidth, 0)))
+        shadersData.blurRadius = 1.0f;
 
 
     ImGui::End();

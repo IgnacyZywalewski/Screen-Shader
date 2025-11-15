@@ -1,8 +1,9 @@
 #version 330
 
-in vec2 TexCoord;
-out vec4 FragColor;
-uniform sampler2D screenTex;
+in vec2 TexCoord; // (x,y)
+out vec4 FragColor; //(r,g,b,a)
+uniform sampler2D screenTex; //tekstura
+uniform vec2 texelSize; //rozmiar pixela
 
 uniform float brightness;
 uniform float gamma;
@@ -16,6 +17,9 @@ uniform float blue;
 uniform bool colorInversion;
 
 uniform bool blackWhite;
+
+uniform bool blur;
+uniform float blurRadius;
 
 
 vec3 rgb2hsv(vec3 color) {
@@ -35,9 +39,9 @@ vec3 hsv2rgb(vec3 color) {
 }
 
 void changeBrightness(inout vec3 color) {
-    vec3 hsv = rgb2hsv(color);
-    hsv.z = clamp(hsv.z * brightness, 0.0, 1.0);
-    color = hsv2rgb(hsv);
+    //vec3 hsv = rgb2hsv(color);
+    color = clamp(color * brightness, 0.0, 1.0);
+    //color = hsv2rgb(hsv);
 }
 
 void changeGamma(inout vec3 color) {
@@ -65,10 +69,24 @@ void changeRGB(out vec3 color) {
     color.b = clamp(color.b * blue, 0.0, 1.0);
 }
 
-void apllyBlackWhiteFilter(out vec3 color) {
+void applyBlackWhiteFilter(out vec3 color) {
     color = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
 }
 
+void applyGaussianBlur(in vec2 uv, out vec3 color) {
+    color = vec3(0.0);
+    float sum = 0.0;
+
+    for (float x = -blurRadius; x <= blurRadius; x++) {
+        float weight = exp(-(x*x) / (2.0 * blurRadius * blurRadius));
+        vec2 offset = vec2(x * texelSize.x, 0.0);
+
+        color += texture(screenTex, uv + offset).rgb * weight;
+        sum += weight;
+    }
+
+    color /= sum;
+}
 
 void main() {
     vec2 uv = TexCoord;
@@ -85,7 +103,10 @@ void main() {
         applyColorInversion(color);
 
     if(blackWhite)
-        apllyBlackWhiteFilter(color);
+        applyBlackWhiteFilter(color);
+
+    if(blur)
+        applyGaussianBlur(uv, color);
 
     FragColor = vec4(color, 1.0);
 }

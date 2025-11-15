@@ -171,9 +171,14 @@ void Renderer::RenderOverlay() {
         glUniform1f(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
         glUniform1f(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
+        glUniform1f(glGetUniformLocation(shaderProgram, "blur"), shadersData.blur);
+        glUniform1f(glGetUniformLocation(shaderProgram, "blurRadius"), shadersData.blurRadius);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
         glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
+
+        glUniform2f(glGetUniformLocation(shaderProgram, "texelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
