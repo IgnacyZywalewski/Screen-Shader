@@ -25,10 +25,10 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
 
     if (!InitOpenGL(hwndOverlay, HDCOverlay, GLContextOverlay))
         return false;
-    
+
     if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
         return false;
-    
+
     if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
         return false;
 
@@ -36,12 +36,12 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
         MessageBox(hwndOverlay, L"Nie udało się współdzielić kontekstów OpenGL!", L"Błąd", MB_OK);
         return false;
     }
-    
+
     if (!gladLoadGL())
         return false;
 
     CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
-    
+
     std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
     std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
     shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
@@ -98,15 +98,15 @@ bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
 
     if (pf == 0)
         return false;
-    
+
     if (!SetPixelFormat(outHDC, pf, &pfd))
         return false;
-    
+
     outContext = wglCreateContext(outHDC);
-    
+
     if (!outContext)
         return false;
-    
+
     if (!wglMakeCurrent(outHDC, outContext))
         return false;
 
@@ -212,12 +212,12 @@ GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs) {
     glBindAttribLocation(prog, 0, "aPos");
     glBindAttribLocation(prog, 1, "aTexCoord");
     glLinkProgram(prog);
-    
+
     GLint ok = 0;
     glGetProgramiv(prog, GL_LINK_STATUS, &ok);
-    
+
     if (!ok) {
-        char buf[1024]; 
+        char buf[1024];
         glGetProgramInfoLog(prog, sizeof(buf), nullptr, buf);
         MessageBoxA(nullptr, buf, "Shader link error", MB_OK);
     }
@@ -292,10 +292,10 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {
 
     if (GLContextOverlay)
         wglDeleteContext(GLContextOverlay);
-    
+
     if (HDCGUI)
         ReleaseDC(hwndGUI, HDCGUI);
-    
+
     if (HDCOverlay)
         ReleaseDC(hwndOverlay, HDCOverlay);
 }

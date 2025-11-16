@@ -1,4 +1,4 @@
-#version 330
+#version 460
 
 in vec2 TexCoord; // (x,y)
 out vec4 FragColor; //(r,g,b,a)
@@ -23,12 +23,17 @@ uniform int blurRadius;
 
 uniform bool emboss;
 
+void forceKeepUniforms() {
+    float dummy = brightness + gamma + contrast + saturation + red + green + blue;
+    dummy += float(colorInversion) + float(blackWhite);
+    dummy += texture(screenTex, vec2(0.0)).r;
+    if (dummy < 0.0) discard;
+}
 
 vec3 rgb2hsv(vec3 color) {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     vec4 p = mix(vec4(color.bg, K.wz), vec4(color.gb, K.xy), step(color.b, color.g));
     vec4 q = mix(vec4(p.xyw, color.r), vec4(color.r, p.yzx), step(p.x, color.r));
-
     float d = q.x - min(q.w, q.y);
     float e = 1.0e-10;
     return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
@@ -41,9 +46,9 @@ vec3 hsv2rgb(vec3 color) {
 }
 
 void changeBrightness(inout vec3 color) {
-    //vec3 hsv = rgb2hsv(color);
-    color = clamp(color * brightness, 0.0, 1.0);
-    //color = hsv2rgb(hsv);
+    vec3 hsv = rgb2hsv(color);
+    hsv.z = clamp(hsv.z * brightness, 0.0, 1.0);
+    color = hsv2rgb(hsv);
 }
 
 void changeGamma(inout vec3 color) {
@@ -61,17 +66,17 @@ void changeSaturation(inout vec3 color) {
     color = hsv2rgb(hsv);
 }
 
-void applyColorInversion(out vec3 color) {
+void applyColorInversion(inout vec3 color) {
     color = 1.0 - color;
 }
 
-void changeRGB(out vec3 color) {
+void changeRGB(inout vec3 color) {
     color.r = clamp(color.r * red, 0.0, 1.0);
     color.g = clamp(color.g * green, 0.0, 1.0);
     color.b = clamp(color.b * blue, 0.0, 1.0);
 }
 
-void applyBlackWhiteFilter(out vec3 color) {
+void applyBlackWhiteFilter(inout vec3 color) {
     color = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
 }
 
@@ -114,8 +119,8 @@ void apllyEmbossFilter(out vec3 color) {
     color = vec3((color.r + color.g + color.b) / 3.0);
 }
 
-
 void main() {
+
     vec2 uv = TexCoord;
     vec3 color = texture(screenTex, uv).rgb;
 
@@ -123,13 +128,12 @@ void main() {
     changeGamma(color);
     changeContrast(color);
     changeSaturation(color);
-
     changeRGB(color);
 
     if (colorInversion)
         applyColorInversion(color);
 
-    if(blackWhite)
+    if (blackWhite)
         applyBlackWhiteFilter(color);
 
     if(blur)

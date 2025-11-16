@@ -5,7 +5,7 @@
 
 bool GUI::Init(HWND hwnd, Renderer& renderer)
 {
-    if (!renderer.InitOpenGL(hwnd, HDCGUI, GLContextGUI)){
+    if (!renderer.InitOpenGL(hwnd, HDCGUI, GLContextGUI)) {
         return false;
     }
 
@@ -19,7 +19,7 @@ bool GUI::Init(HWND hwnd, Renderer& renderer)
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplOpenGL3_Init("#version 330");
+    ImGui_ImplOpenGL3_Init("#version 460");
 
     //czcionka
     ImGuiIO& io = ImGui::GetIO();
@@ -66,7 +66,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
             dragOffset.y = p.y - r.top;
         }
         if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) {
-            POINT p; 
+            POINT p;
             GetCursorPos(&p);
             SetWindowPos(hwnd, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
         }
@@ -203,7 +203,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::NewLine();
 
     //blur
-    ImGui::NewLine();
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Blur");
     ImGui::SameLine();
@@ -241,9 +240,9 @@ void GUI::Close()
 
     wglMakeCurrent(NULL, NULL);
 
-    if (GLContextGUI) 
+    if (GLContextGUI)
         wglDeleteContext(GLContextGUI);
 
-    if (HDCGUI) 
+    if (HDCGUI)
         ReleaseDC(nullptr, HDCGUI);
 }
