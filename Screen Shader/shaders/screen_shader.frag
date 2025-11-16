@@ -3,7 +3,7 @@
 in vec2 TexCoord; // (x,y)
 out vec4 FragColor; //(r,g,b,a)
 uniform sampler2D screenTex; //tekstura
-uniform vec2 texelSize; //rozmiar pixela
+uniform vec2 pixelSize; //rozmiar pixela
 
 uniform float brightness;
 uniform float gamma;
@@ -19,7 +19,9 @@ uniform bool colorInversion;
 uniform bool blackWhite;
 
 uniform bool blur;
-uniform float blurRadius;
+uniform int blurRadius;
+
+uniform bool emboss;
 
 
 vec3 rgb2hsv(vec3 color) {
@@ -77,16 +79,41 @@ void applyGaussianBlur(in vec2 uv, out vec3 color) {
     color = vec3(0.0);
     float sum = 0.0;
 
-    for (float x = -blurRadius; x <= blurRadius; x++) {
+    for (int x = -blurRadius; x <= blurRadius; x++) {
         float weight = exp(-(x*x) / (2.0 * blurRadius * blurRadius));
-        vec2 offset = vec2(x * texelSize.x, 0.0);
-
+        vec2 offset = vec2(x * pixelSize.x, 0.0);
         color += texture(screenTex, uv + offset).rgb * weight;
         sum += weight;
     }
 
     color /= sum;
+
+    vec3 tempColor = color;
+    color = vec3(0.0);
+    sum = 0.0;
+
+    for (int y = -blurRadius; y <= blurRadius; y++) {
+        float weight = exp(-(y*y) / (2.0 * blurRadius * blurRadius));
+        vec2 offset = vec2(0.0, y * pixelSize.y);
+        color += texture(screenTex, uv + offset).rgb * weight;
+        sum += weight;
+    }
+
+    color /= sum;
+
+    color = (color + tempColor) / 2.0;
 }
+
+
+void apllyEmbossFilter(out vec3 color) {
+    color = vec3(0.5);
+
+    color += texture(screenTex, TexCoord - pixelSize).rgb + 1.0;
+    color -= texture(screenTex, TexCoord + pixelSize).rgb + 1.0;
+
+    color = vec3((color.r + color.g + color.b) / 3.0);
+}
+
 
 void main() {
     vec2 uv = TexCoord;
@@ -107,6 +134,9 @@ void main() {
 
     if(blur)
         applyGaussianBlur(uv, color);
+
+    if(emboss)
+        apllyEmbossFilter(color);
 
     FragColor = vec4(color, 1.0);
 }

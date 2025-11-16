@@ -21,7 +21,9 @@ struct ShadersData {
     bool verticalSwap = false;
 
     bool blur = false;
-    float blurRadius = 1.0f;
+    int blurRadius = 1;
+
+    bool emboss = false;
 };
 
 class Renderer {

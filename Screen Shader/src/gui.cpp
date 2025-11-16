@@ -94,7 +94,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Brightness");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.0f, 4.0f);
+    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.5f, 4.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(buttonWidth, 0)))
@@ -105,7 +105,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Gamma");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.0f, 4.0f);
+    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.5f, 4.0f);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(buttonWidth, 0)))
@@ -204,16 +204,25 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
 
     //blur
     ImGui::NewLine();
+    ImGui::AlignTextToFramePadding();
     ImGui::Text("Blur");
     ImGui::SameLine();
     ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##blur_radius_slider", &shadersData.blurRadius, 1.0f, 5.0f);
+    ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 5);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(buttonWidth, 0)))
-        shadersData.blurRadius = 1.0f;
+        shadersData.blurRadius = 1;
+
+    //emboss
+    ImGui::NewLine();
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Emboss filter");
+    ImGui::SameLine();
+    ImGui::Checkbox("##emboss_checkbox", &shadersData.emboss);
+    ImGui::NewLine();
 
 
     ImGui::End();

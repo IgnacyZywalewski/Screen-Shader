@@ -155,30 +155,31 @@ void Renderer::RenderOverlay() {
     if (screenTexture != 0) {
         glUseProgram(shaderProgram);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, screenTexture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
+        glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
         glUniform1f(glGetUniformLocation(shaderProgram, "saturation"), shadersData.saturation);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
+        glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
 
         glUniform1f(glGetUniformLocation(shaderProgram, "red"), shadersData.red);
         glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
         glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
+        glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
-        glUniform1f(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
+        glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
+        glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "blur"), shadersData.blur);
-        glUniform1f(glGetUniformLocation(shaderProgram, "blurRadius"), shadersData.blurRadius);
+        glUniform1i(glGetUniformLocation(shaderProgram, "blur"), shadersData.blur);
+        glUniform1i(glGetUniformLocation(shaderProgram, "blurRadius"), shadersData.blurRadius);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
-        glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
-
-        glUniform2f(glGetUniformLocation(shaderProgram, "texelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+        glUniform1f(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -216,7 +217,8 @@ GLuint Renderer::CreateShaderProgram(const char* vs, const char* fs) {
     glGetProgramiv(prog, GL_LINK_STATUS, &ok);
     
     if (!ok) {
-        char buf[1024]; glGetProgramInfoLog(prog, sizeof(buf), nullptr, buf);
+        char buf[1024]; 
+        glGetProgramInfoLog(prog, sizeof(buf), nullptr, buf);
         MessageBoxA(nullptr, buf, "Shader link error", MB_OK);
     }
 
