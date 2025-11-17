@@ -48,6 +48,7 @@
     <ClCompile Include="src\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\blur_shader.frag" />
     <None Include="shaders\screen_shader.frag" />
     <None Include="shaders\screen_shader.vert" />
   </ItemGroup>

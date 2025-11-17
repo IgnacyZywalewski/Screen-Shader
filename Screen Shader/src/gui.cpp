@@ -19,7 +19,7 @@ bool GUI::Init(HWND hwnd, Renderer& renderer)
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
-    ImGui_ImplOpenGL3_Init("#version 460");
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     //czcionka
     ImGuiIO& io = ImGui::GetIO();

@@ -26,16 +26,8 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
     if (!InitOpenGL(hwndOverlay, HDCOverlay, GLContextOverlay))
         return false;
 
-    if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
-        return false;
-
     if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
         return false;
-
-    if (!wglShareLists(GLContextOverlay, GLContextGUI)) {
-        MessageBox(hwndOverlay, L"Nie udało się współdzielić kontekstów OpenGL!", L"Błąd", MB_OK);
-        return false;
-    }
 
     if (!gladLoadGL())
         return false;
@@ -44,7 +36,10 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
 
     std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
     std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
+    std::string blurFragShader = LoadShaderFromFile("shaders/blur_shader.frag");
+
     shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
+    blurShaderProgram = CreateShaderProgram(vertexShader.c_str(), blurFragShader.c_str());
 
     float vertices[] = {
         -1.0f,  1.0f, 0.0f, 0.0f,
@@ -78,6 +73,23 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        //fbo
+        glGenTextures(1, &blurTexture);
+        glBindTexture(GL_TEXTURE_2D, blurTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, screenPacked.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glGenFramebuffers(1, &blurFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture, 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     return true;
@@ -116,43 +128,37 @@ bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
 
 void Renderer::Update() {
     static ULONGLONG lastCapture = GetTickCount64();
-    const ULONGLONG captureInterval = 1;
+    const ULONGLONG captureInterval = 4;
     ULONGLONG now = GetTickCount64();
 
     if (now - lastCapture >= captureInterval) {
         lastCapture = now;
 
-        std::vector<BYTE> newPacked;
-        if (screenTexture != 0) {
-            CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
+        CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
 
-            if (wglMakeCurrent(HDCOverlay, GLContextOverlay)) {
-                if (screenTexture == 0) {
-                    glGenTextures(1, &screenTexture);
-                    glBindTexture(GL_TEXTURE_2D, screenTexture);
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
-                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-                }
-                else {
-                    glBindTexture(GL_TEXTURE_2D, screenTexture);
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, screenWidth, screenHeight, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
-                    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-                }
+        if (wglMakeCurrent(HDCOverlay, GLContextOverlay)) {
+            if (screenTexture != 0) {
+                glBindTexture(GL_TEXTURE_2D, screenTexture);
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, screenWidth, screenHeight, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
             }
         }
     }
 }
 
+
 void Renderer::RenderOverlay() {
     wglMakeCurrent(HDCOverlay, GLContextOverlay);
-    glViewport(0, 0, screenWidth, screenHeight);
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+
 
     if (screenTexture != 0) {
+        //redner do fbo
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+        glViewport(0, 0, screenWidth, screenHeight);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         glUseProgram(shaderProgram);
 
         glActiveTexture(GL_TEXTURE0);
@@ -160,6 +166,7 @@ void Renderer::RenderOverlay() {
         glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
         glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
 
+        //pass 1 - jasnosc, kontrast, kolory itp...
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
@@ -176,14 +183,32 @@ void Renderer::RenderOverlay() {
         glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
         glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
-        glUniform1i(glGetUniformLocation(shaderProgram, "blur"), shadersData.blur);
-        glUniform1i(glGetUniformLocation(shaderProgram, "blurRadius"), shadersData.blurRadius);
-
         glUniform1f(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
+
+
+        //pass 2 - blur
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, screenWidth, screenHeight);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(blurShaderProgram);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, blurTexture);
+        glUniform1i(glGetUniformLocation(blurShaderProgram, "screenTex"), 0);
+        glUniform2f(glGetUniformLocation(blurShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+        
+        glUniform1f(glGetUniformLocation(blurShaderProgram, "blur"), shadersData.blur);
+        glUniform1i(glGetUniformLocation(blurShaderProgram, "blurRadius"), shadersData.blurRadius);
+        
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
     SwapBuffers(HDCOverlay);
@@ -245,7 +270,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biHeight = height;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
@@ -279,12 +304,17 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {
 
     if (screenTexture)
         glDeleteTextures(1, &screenTexture);
-
+    if (blurTexture)
+        glDeleteTextures(1, &blurTexture);
+    
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(blurShaderProgram);
+    
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
-
+    glDeleteFramebuffers(1, &blurFbo);
+    
     wglMakeCurrent(NULL, NULL);
 
     if (GLContextGUI)
@@ -298,4 +328,5 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {
 
     if (HDCOverlay)
         ReleaseDC(hwndOverlay, HDCOverlay);
+
 }

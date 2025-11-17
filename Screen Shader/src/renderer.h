@@ -48,6 +48,11 @@ private:
 
     GLuint screenTexture = 0;
     GLuint shaderProgram = 0;
+
+    GLuint blurFbo = 0;
+    GLuint blurTexture = 0;
+    GLuint blurShaderProgram = 0;
+
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
     std::vector<BYTE> screenPacked;

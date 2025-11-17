@@ -10,6 +10,12 @@
     <Filter Include="src">
       <UniqueIdentifier>{4cbb6c6a-df61-4768-b5b5-dc0cf49364c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{44d34a38-641e-4abf-a483-5eeef0c5b267}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets">
+      <UniqueIdentifier>{61035c3e-b6da-46ac-813c-da0bf576dbb9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -49,7 +55,7 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="assets\icons_font_awesome_6.h">
-      <Filter>src</Filter>
+      <Filter>assets</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,15 +98,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\screen_shader.frag">
-      <Filter>src</Filter>
+      <Filter>shaders</Filter>
     </None>
     <None Include="shaders\screen_shader.vert">
-      <Filter>src</Filter>
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="shaders\blur_shader.frag">
+      <Filter>shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fa_solid_900.ttf">
-      <Filter>src</Filter>
+      <Filter>assets</Filter>
     </Font>
   </ItemGroup>
 </Project>
