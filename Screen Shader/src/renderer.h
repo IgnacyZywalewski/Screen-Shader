@@ -24,6 +24,11 @@ struct ShadersData {
     int blurRadius = 1;
 
     bool emboss = false;
+
+    bool dog = false;
+    int radius1 = 3;
+    int radius2 = 4;
+    float threshold = 0.01f;
 };
 
 class Renderer {
@@ -47,12 +52,16 @@ private:
     void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height);
 
     GLuint screenTexture = 0;
-    GLuint shaderProgram = 0;
-
-    GLuint blurFbo = 0;
+    GLuint dogTexture = 0;
     GLuint blurTexture = 0;
+
+    GLuint shaderProgram = 0;
+    GLuint dogShaderProgram = 0;
     GLuint blurShaderProgram = 0;
 
+    GLuint blurFbo = 0;
+    GLuint dogFbo = 0;
+    
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
     std::vector<BYTE> screenPacked;

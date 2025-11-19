@@ -8,47 +8,36 @@ uniform vec2 pixelSize; //rozmiar pixela
 uniform bool blur;
 uniform int blurRadius;
 
-void forceKeepUniforms() {
-    float dummy = texture(screenTex, vec2(0.0)).r;
-    if (dummy < 0.0) discard;
-}
-
-void applyGaussianBlur(out vec3 color) {
-    color = vec3(0.0);
+vec3 gaussian1D(bool horizontal) {
+    vec3 color = vec3(0.0);
     float sum = 0.0;
+    float sigma = float(blurRadius) / 3.0f;
 
-    for (int x = -blurRadius; x <= blurRadius; x++) {
-        float weight = exp(-(x*x) / (2.0 * blurRadius * blurRadius));
-        vec2 offset = vec2(x * pixelSize.x, 0.0);
+    for (int i = -blurRadius; i <= blurRadius; i++) {
+        float x = float(i);
+        float weight = exp(-(x*x)/(2.0*sigma*sigma));
+
+        vec2 offset = horizontal ? vec2(x * pixelSize.x, 0.0) : vec2(0.0, x * pixelSize.y);
+
         color += texture(screenTex, TexCoord + offset).rgb * weight;
         sum += weight;
     }
 
-    color /= sum;
-
-    //vec3 tempColor = color;
-    //color = vec3(0.0);
-    //sum = 0.0;
-
-    //for (int y = -blurRadius; y <= blurRadius; y++) {
-    //    float weight = exp(-(y*y) / (2.0 * blurRadius * blurRadius));
-    //    vec2 offset = vec2(0.0, y * pixelSize.y);
-    //    color += texture(screenTex, uv + offset).rgb * weight;
-    //    sum += weight;
-    //}
-
-    //color /= sum;
-
-    //color = (color + tempColor) / 2.0;
+    return color / sum;
 }
 
+vec3 gaussianBlur2D() {
+    vec3 blurH = gaussian1D(true);
+    vec3 blurV = gaussian1D(false);
+
+    return (blurH + blurV) / 2.0;
+}
 
 void main() {
-    vec2 uv = TexCoord;
-    vec3 color = texture(screenTex, uv).rgb;
+    vec3 color = texture(screenTex, TexCoord).rgb;
 
     if(blur)
-        applyGaussianBlur(color);
-
+        color = gaussianBlur2D();
+    
     FragColor = vec4(color, 1.0);
 }

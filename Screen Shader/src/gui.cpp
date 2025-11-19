@@ -3,8 +3,7 @@
 #include <glad/glad.h>
 #include "assets/icons_font_awesome_6.h"
 
-bool GUI::Init(HWND hwnd, Renderer& renderer)
-{
+bool GUI::Init(HWND hwnd, Renderer& renderer) {
     if (!renderer.InitOpenGL(hwnd, HDCGUI, GLContextGUI)) {
         return false;
     }
@@ -37,20 +36,18 @@ bool GUI::Init(HWND hwnd, Renderer& renderer)
     return true;
 }
 
-void GUI::Render(HWND hwnd, ShadersData& shadersData)
-{
+void GUI::Render(HWND hwnd, ShadersData& shadersData) {
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(350, 500));
+    ImGui::SetNextWindowSize(ImVec2(350, 550));
 
     ImGui::Begin("Screen Shader", nullptr,
         ImGuiWindowFlags_NoDecoration |
         ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoBringToFrontOnFocus
     );
@@ -94,7 +91,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Brightness");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.5f, 4.0f);
+    ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.5f, 4.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(buttonWidth, 0)))
@@ -105,7 +102,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Gamma");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.5f, 4.0f);
+    ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.5f, 4.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(buttonWidth, 0)))
@@ -116,7 +113,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Contrast");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -50.0f, 50.0f);
+    ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -50.0f, 50.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(buttonWidth, 0)))
@@ -127,7 +124,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Saturation");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderFloat("##saturation_slider", &shadersData.saturation, 0.0f, 3.0f);
+    ImGui::SliderFloat("##saturation_slider", &shadersData.saturation, 0.0f, 3.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_saturation", ImVec2(buttonWidth, 0)))
@@ -139,7 +136,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Red");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##red_slider", &shadersData.red, 0.0f, 2.0f);
+    ImGui::SliderFloat("##red_slider", &shadersData.red, 0.0f, 2.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_red", ImVec2(buttonWidth, 0)))
@@ -152,7 +149,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Green");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##green_slider", &shadersData.green, 0.0f, 2.0f);
+    ImGui::SliderFloat("##green_slider", &shadersData.green, 0.0f, 2.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_green", ImVec2(buttonWidth, 0)))
@@ -165,7 +162,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Text("Blue");
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth - buttonWidth - 8.0f);
-    ImGui::SliderFloat("##blue_slider", &shadersData.blue, 0.0f, 2.0f);
+    ImGui::SliderFloat("##blue_slider", &shadersData.blue, 0.0f, 2.0f, "%.2f");
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_XMARK "##zero_blue", ImVec2(buttonWidth, 0)))
@@ -189,6 +186,13 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
     ImGui::NewLine();
 
+    //emboss
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Emboss filter");
+    ImGui::SameLine();
+    ImGui::Checkbox("##emboss_checkbox", &shadersData.emboss);
+    ImGui::NewLine();
+
     //zamiana hotyzontalna
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Horizontal Swap");
@@ -202,6 +206,21 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
     ImGui::NewLine();
 
+    //dog
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Edge detection");
+    ImGui::SameLine();
+    ImGui::Checkbox("##dog_checkbox", &shadersData.dog);
+    ImGui::Text("Threshold");
+    ImGui::SameLine(labelWidth);
+    ImGui::PushItemWidth(sliderWidth);
+    ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 0.02f, "%.4f");
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_threshold", ImVec2(buttonWidth, 0)))
+        shadersData.threshold = 0.01f;
+    ImGui::NewLine();
+
     //blur
     ImGui::AlignTextToFramePadding();
     ImGui::Text("Blur");
@@ -209,20 +228,11 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
     ImGui::SameLine(labelWidth);
     ImGui::PushItemWidth(sliderWidth);
-    ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 5);
+    ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
     ImGui::PopItemWidth();
     ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(buttonWidth, 0)))
         shadersData.blurRadius = 1;
-
-    //emboss
-    ImGui::NewLine();
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("Emboss filter");
-    ImGui::SameLine();
-    ImGui::Checkbox("##emboss_checkbox", &shadersData.emboss);
-    ImGui::NewLine();
-
 
     ImGui::End();
 
@@ -231,8 +241,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData)
     SwapBuffers(HDCGUI);
 }
 
-void GUI::Close()
-{
+void GUI::Close() {
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();

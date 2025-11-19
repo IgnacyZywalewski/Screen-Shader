@@ -69,7 +69,7 @@ void App::Run() {
     hwndGUI = CreateWindowEx(
         WS_EX_TOPMOST,
         GUI_CLASS, L"Screen Shader", WS_POPUP,
-        screenWidth / 2 + 300, screenHeight / 2 - 300, 350, 500,
+        screenWidth / 2 + 300, screenHeight / 2 - 300, 350, 550,
         nullptr, nullptr, hInstance, nullptr
     );
     ShowWindow(hwndGUI, SW_SHOW);

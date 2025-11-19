@@ -36,9 +36,11 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
 
     std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
     std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
+    std::string dogFragShader = LoadShaderFromFile("shaders/dog_shader.frag");
     std::string blurFragShader = LoadShaderFromFile("shaders/blur_shader.frag");
 
     shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
+    dogShaderProgram = CreateShaderProgram(vertexShader.c_str(), dogFragShader.c_str());
     blurShaderProgram = CreateShaderProgram(vertexShader.c_str(), blurFragShader.c_str());
 
     float vertices[] = {
@@ -74,7 +76,24 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-        //fbo
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        //dog fbo
+        glGenTextures(1, &dogTexture);
+        glBindTexture(GL_TEXTURE_2D, dogTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, screenPacked.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glGenFramebuffers(1, &dogFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dogTexture, 0);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            MessageBoxA(nullptr, "Dog FBO not complete!", "Error", MB_OK);
+        }
+
+        //blur fbo
         glGenTextures(1, &blurTexture);
         glBindTexture(GL_TEXTURE_2D, blurTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, screenPacked.data());
@@ -86,10 +105,8 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture, 0);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
+            MessageBoxA(nullptr, "Blur FBO not complete!", "Error", MB_OK);
         }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     return true;
@@ -151,10 +168,9 @@ void Renderer::Update() {
 void Renderer::RenderOverlay() {
     wglMakeCurrent(HDCOverlay, GLContextOverlay);
 
-
     if (screenTexture != 0) {
-        //redner do fbo
-        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+        //pass 1 - jasnosc, kontrast, kolory itp...
+        glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
         glViewport(0, 0, screenWidth, screenHeight);
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -166,7 +182,6 @@ void Renderer::RenderOverlay() {
         glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
         glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
 
-        //pass 1 - jasnosc, kontrast, kolory itp...
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
@@ -190,7 +205,30 @@ void Renderer::RenderOverlay() {
         glBindVertexArray(0);
 
 
-        //pass 2 - blur
+        //pass 2 - dog
+        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+        glViewport(0, 0, screenWidth, screenHeight);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(dogShaderProgram);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, dogTexture);
+        glUniform1i(glGetUniformLocation(dogShaderProgram, "screenTex"), 0);
+        glUniform2f(glGetUniformLocation(dogShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+
+        glUniform1i(glGetUniformLocation(dogShaderProgram, "dog"), shadersData.dog);
+        glUniform1i(glGetUniformLocation(dogShaderProgram, "radius1"), shadersData.radius1);
+        glUniform1i(glGetUniformLocation(dogShaderProgram, "radius2"), shadersData.radius2);
+        glUniform1f(glGetUniformLocation(dogShaderProgram, "threshold"), shadersData.threshold);
+
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+
+
+        //pass 3 - blur
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, screenWidth, screenHeight);
         glClearColor(0, 0, 0, 0);
@@ -270,7 +308,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = height;
+    bmi.bmiHeader.biHeight = -height;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
@@ -304,10 +342,13 @@ void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {
 
     if (screenTexture)
         glDeleteTextures(1, &screenTexture);
+    if (dogTexture)
+        glDeleteTextures(1, &dogTexture);
     if (blurTexture)
         glDeleteTextures(1, &blurTexture);
     
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(dogShaderProgram);
     glDeleteProgram(blurShaderProgram);
     
     glDeleteBuffers(1, &VBO);
