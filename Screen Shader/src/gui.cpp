@@ -48,6 +48,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
     static float titleBarHeight = 40.0f;
     float buttonWidth = 24.0f;
     float labelWidth = 90.0f;
+    static bool nightMode = true;
+
 
     static ImGuiWindowFlags flags = 0;
     flags |= ImGuiWindowFlags_NoTitleBar;
@@ -101,14 +103,20 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
         ImGui::SameLine();
 
         ImGui::Text("Screen Shader");
-        ImGui::SameLine(ImGui::GetWindowWidth() - 70);
+        ImGui::SameLine(ImGui::GetWindowWidth() - (3 * buttonWidth) - 24);
 
-        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(buttonWidth, buttonWidth)))ShowWindow(hwnd, SW_MINIMIZE);
+        if (ImGui::Button(nightMode ? ICON_FA_MOON : ICON_FA_SUN, ImVec2(buttonWidth, buttonWidth))) {
+            if (nightMode) ImGui::StyleColorsLight();
+            else ImGui::StyleColorsDark();
+            nightMode = !nightMode;
+        }
+        ImGui::SameLine();
+
+        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(buttonWidth, buttonWidth))) ShowWindow(hwnd, SW_MINIMIZE);
         ImGui::SameLine();
         if (ImGui::Button(ICON_FA_XMARK, ImVec2(buttonWidth, buttonWidth))) PostQuitMessage(0);
 
-        if (!collapsed)
-            ImGui::Separator();
+        if (!collapsed) ImGui::Separator();
     }
 
     float sliderWidth = ImGui::GetWindowWidth() - labelWidth - buttonWidth - 45.0f;
