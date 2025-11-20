@@ -6,12 +6,15 @@ uniform sampler2D screenTex; //tekstura
 uniform vec2 pixelSize; //rozmiar pixela
 
 uniform bool dog;
-uniform int radius1;
-uniform int radius2;   
+uniform float sigma;
+uniform float scale;   
 uniform float threshold;
+uniform int tau;
+uniform vec4 dogColor1;
+uniform vec4 dogColor2;
 
-vec3 gaussian1D(int radius, bool horizontal) {
-    float sigma = float(radius) / 3.0f;
+vec3 gaussian1D(float sigma, bool horizontal) {
+    int radius = int(ceil(sigma * 3.0f));
     vec3 color = vec3(0.0);
     float sum = 0.0;
 
@@ -26,9 +29,9 @@ vec3 gaussian1D(int radius, bool horizontal) {
     return color / sum;
 }
 
-vec3 gaussianBlur(int radius) {
-    vec3 blurH = gaussian1D(radius, true);
-    vec3 blurV = gaussian1D(radius, false);
+vec3 gaussianBlur(float sigma) {
+    vec3 blurH = gaussian1D(sigma, true);
+    vec3 blurV = gaussian1D(sigma, false);
 
     return (blurH + blurV) / 2.0;
 }
@@ -37,15 +40,16 @@ void main(){
     vec3 color = texture(screenTex, TexCoord).rgb;
 
     if(dog){
-        vec3 blur1 = gaussianBlur(radius1);
-        vec3 blur2 = gaussianBlur(radius2);
+        vec3 blur1 = gaussianBlur(sigma);
+        vec3 blur2 = gaussianBlur(sigma * scale);
 
-        vec3 dogResult = blur1 - blur2;
+        vec3 dogResult = (1 + tau) * blur1 - (tau * blur2);
 
-        float intensity = dot(dogResult, vec3(0.299, 0.587, 0.114));
+        float intensity = dot(dogResult, vec3(0.299f, 0.587f, 0.114f));
 
+        //1.0 + tanh(1.0f * (intensity - threshold));
         float edge = intensity > threshold ? 1.0 : 0.0;
-        FragColor = vec4(vec3(edge), 1.0);
+        FragColor = mix(dogColor2, dogColor1, edge);
     } 
     else {
         FragColor = texture(screenTex, TexCoord);

@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <vector>
 #include <glad/glad.h>
+#include "imgui/imgui.h"
 
 struct ShadersData {
     float brightness = 1.0f;
@@ -21,14 +22,17 @@ struct ShadersData {
     bool verticalSwap = false;
 
     bool blur = false;
-    int blurRadius = 1;
+    int blurRadius = 5;
 
     bool emboss = false;
 
     bool dog = false;
-    int radius1 = 3;
-    int radius2 = 4;
-    float threshold = 0.01f;
+    float sigma = 1.0f;
+    float scale = 1.5f;
+    float threshold = 0.2f;
+    int tau = 10;
+    ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    ImVec4 dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
 class Renderer {
