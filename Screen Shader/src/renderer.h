@@ -27,7 +27,7 @@ struct ShadersData {
     bool emboss = false;
 
     bool dog = false;
-    float sigma = 1.0f;
+    float sigma = 0.5f;
     float scale = 1.5f;
     float threshold = 0.2f;
     int tau = 10;
