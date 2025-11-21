@@ -15,10 +15,13 @@ uniform float green;
 uniform float blue;
 
 uniform bool colorInversion;
-
 uniform bool blackWhite;
-
 uniform bool emboss;
+
+uniform bool vignette;
+uniform float vigRadius;
+uniform float vigSmoothness;
+
 
 void forceKeepUniforms() {
     float dummy = brightness + gamma + contrast + saturation + red + green + blue;
@@ -77,13 +80,26 @@ void applyBlackWhiteFilter(inout vec3 color) {
     color = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
 }
 
-void apllyEmbossFilter(out vec3 color) {
+void applyEmbossFilter(out vec3 color) {
     color = vec3(0.5);
 
     color += texture(screenTex, TexCoord - pixelSize).rgb + 1.0;
     color -= texture(screenTex, TexCoord + pixelSize).rgb + 1.0;
 
     color = vec3((color.r + color.g + color.b) / 3.0);
+}
+
+void applyVignetteFilter(out vec3 color) {
+    vec2 uv = TexCoord - vec2(0.5);
+    
+    vec2 texSize = textureSize(screenTex, 0);
+    float aspectRatio = texSize.x / texSize.y;
+
+    uv.x *= aspectRatio;
+    float dist = length(uv);
+    float vignetteValue = smoothstep(vigRadius, vigRadius - vigSmoothness, dist);
+
+    color *= vignetteValue;
 }
 
 void main() {
@@ -103,7 +119,10 @@ void main() {
         applyBlackWhiteFilter(color);
 
     if(emboss)
-        apllyEmbossFilter(color);
+        applyEmbossFilter(color);
+
+    if(vignette)
+        applyVignetteFilter(color);
 
     FragColor = vec4(color, 1.0);
 }

@@ -186,19 +186,23 @@ void Renderer::RenderOverlay() {
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
         glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
         glUniform1f(glGetUniformLocation(shaderProgram, "saturation"), shadersData.saturation);
-
-        glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
-
+        
         glUniform1f(glGetUniformLocation(shaderProgram, "red"), shadersData.red);
         glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
         glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
-
+        
+        glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
         glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
+        glUniform1f(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
+        
+        glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
+        glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
+        glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
+        
 
         glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
         glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -226,7 +230,6 @@ void Renderer::RenderOverlay() {
         glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
         glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
 
-
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -247,10 +250,10 @@ void Renderer::RenderOverlay() {
         
         glUniform1f(glGetUniformLocation(blurShaderProgram, "blur"), shadersData.blur);
         glUniform1i(glGetUniformLocation(blurShaderProgram, "blurRadius"), shadersData.blurRadius);
-        
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
     }
 
     SwapBuffers(HDCOverlay);

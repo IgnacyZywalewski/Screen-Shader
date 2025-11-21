@@ -11,6 +11,7 @@ struct GUIData {
     float titleBarHeight = 40.0f;
     float buttonWidth = 24.0f;
     float labelWidth = 90.0f;
+    float offset = 10.0f;
     
     bool nightMode = true;
     bool collapsed = false;

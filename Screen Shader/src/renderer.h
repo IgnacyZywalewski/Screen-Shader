@@ -15,16 +15,15 @@ struct ShadersData {
     float blue = 1.0f;
 
     bool colorInversion = false;
-
     bool blackWhite = false;
+    bool emboss = false;
+
+    bool vignette = false;
+    float vigRadius = 1.0f;
+    float vigSmoothness = 1.0f;
 
     bool horizontalSwap = false;
     bool verticalSwap = false;
-
-    bool blur = false;
-    int blurRadius = 5;
-
-    bool emboss = false;
 
     bool dog = false;
     float sigma = 0.5f;
@@ -33,6 +32,10 @@ struct ShadersData {
     int tau = 10;
     ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    
+    bool blur = false;
+    int blurRadius = 5;
+
 };
 
 class Renderer {

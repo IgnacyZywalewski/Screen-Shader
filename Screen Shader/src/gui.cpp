@@ -205,6 +205,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 shadersData.blue = 1.0f;
 
             ImGui::NewLine();
+            ImGui::NewLine();
+
         }
 
 
@@ -232,8 +234,24 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::Text("Emboss filter");
             ImGui::SameLine();
             ImGui::Checkbox("##emboss_checkbox", &shadersData.emboss);
+
+            //vignette
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Vignette");
+            ImGui::SameLine();
+            ImGui::Checkbox("##vignette_checkbox", &shadersData.vignette);
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::PushItemWidth(sliderWidth);
+            ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.5f, "%.2f");
+            ImGui::PopItemWidth();
+            ImGui::SameLine();
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonWidth, 0)))
+                shadersData.vigRadius = 1.0f;
+
+            ImGui::NewLine();
             ImGui::NewLine();
         }
+
 
 
         //odwrocenia ekranu
@@ -254,6 +272,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::Text("Vertical Swap");
             ImGui::SameLine();
             ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
+
+            ImGui::NewLine();
             ImGui::NewLine();
         }
 
@@ -289,38 +309,44 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_scale", ImVec2(buttonWidth, 0)))
                 shadersData.scale = 1.5f;*/
 
+            ImGui::Indent(guiData.offset);
+            if (ImGui::CollapsingHeader("Options"))
+            {
+                ImGui::Text("Brightness");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 1.0f, "%.4f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_threshold", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.threshold = 0.2f;
 
-            ImGui::Text("Brightness");
-            ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 1.0f, "%.4f");
-            ImGui::PopItemWidth();
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_threshold", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.threshold = 0.2f;
+                ImGui::Text("Sharpness");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderInt("##dog_tau_slider", &shadersData.tau, 0, 50);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.tau = 10;
 
-            ImGui::Text("Sharpness");
-            ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderInt("##dog_tau_slider", &shadersData.tau, 0, 50);
-            ImGui::PopItemWidth();
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.tau = 10;
+                ImGui::Text("Color A");
+                ImGui::SameLine(guiData.labelWidth - 26.0f);
+                ImGui::ColorEdit3("##dog_color1", (float*)&shadersData.dogColor1);
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-            ImGui::Text("Color A");
-            ImGui::SameLine(guiData.labelWidth - 26.0f);
-            ImGui::ColorEdit3("##dog_color1", (float*)&shadersData.dogColor1);
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                ImGui::Text("Color B");
+                ImGui::SameLine(guiData.labelWidth - 26.0f);
+                ImGui::ColorEdit3("##dog_color2", (float*)&shadersData.dogColor2);
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+            }
+            ImGui::Unindent(guiData.offset);
 
-            ImGui::Text("Color B");
-            ImGui::SameLine(guiData.labelWidth - 26.0f);
-            ImGui::ColorEdit3("##dog_color2", (float*)&shadersData.dogColor2);
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+            ImGui::NewLine();
             ImGui::NewLine();
         }
 
@@ -344,6 +370,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SameLine();
             if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonWidth, 0)))
                 shadersData.blurRadius = 5;
+
+            ImGui::NewLine();
             ImGui::NewLine();
         }
         
