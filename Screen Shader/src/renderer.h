@@ -5,6 +5,8 @@
 #include "imgui/imgui.h"
 
 struct ShadersData {
+    float shaderTime = 0.0f;
+
     float brightness = 1.0f;
     float gamma = 1.0f;
     float contrast = 0.0f;
@@ -21,6 +23,9 @@ struct ShadersData {
     bool vignette = false;
     float vigRadius = 1.0f;
     float vigSmoothness = 1.0f;
+
+    bool filmGrain = false;
+    float grainAmount = 0.5f;
 
     bool horizontalSwap = false;
     bool verticalSwap = false;

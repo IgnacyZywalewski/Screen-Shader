@@ -79,11 +79,14 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::SetWindowSize(ImVec2(ImGui::GetWindowSize().x, guiData.lastHeight));
                 flags &= ~ImGuiWindowFlags_NoScrollWithMouse;
                 flags &= ~ImGuiWindowFlags_NoScrollbar;
+                //flags &= ~ImGuiWindowFlags_NoResize;
+
             }
             else {
                 guiData.lastHeight = ImGui::GetWindowSize().y;
                 flags |= ImGuiWindowFlags_NoScrollWithMouse;
                 flags |= ImGuiWindowFlags_NoScrollbar;
+                //flags |= ImGuiWindowFlags_NoResize;
             }
             guiData.collapsed = !guiData.collapsed;
 
@@ -117,8 +120,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameCC = false;
         }
-        if (ImGui::CollapsingHeader("Color corection"))
-        {
+        if (ImGui::CollapsingHeader("Color corection")) {
             //jasnosc
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Brightness");
@@ -215,8 +217,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameFIL = false;
         }
-        if (ImGui::CollapsingHeader("Filters"))
-        {
+        if (ImGui::CollapsingHeader("Filters")) {
             //inwersja kolorow
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Negative");
@@ -240,18 +241,44 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::Text("Vignette");
             ImGui::SameLine();
             ImGui::Checkbox("##vignette_checkbox", &shadersData.vignette);
-            ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.5f, "%.2f");
-            ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.vigRadius = 1.0f;
+            if (ImGui::CollapsingHeader("Vignette Option")) {
+                ImGui::Indent(guiData.offset);
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Radius");
+                ImGui::SameLine(guiData.labelWidth + guiData.offset);
+                ImGui::PushItemWidth(sliderWidth - guiData.offset);
+                ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.5f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.vigRadius = 1.0f;
+                ImGui::Unindent(guiData.offset);
+            }
+
+            //grain
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Film grain");
+            ImGui::SameLine();
+            ImGui::Checkbox("##grain_checkbox", &shadersData.filmGrain);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Grain Option")) {
+                ImGui::Indent(guiData.offset);
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Grain Amount");
+                ImGui::SameLine(guiData.labelWidth + guiData.offset);
+                ImGui::PushItemWidth(sliderWidth - guiData.offset);
+                ImGui::SliderFloat("##grain_amount_slider", &shadersData.grainAmount, 0.2f, 2.0f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_amount_size", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.grainAmount = 0.5f;
+                ImGui::Unindent(guiData.offset);
+            }
 
             ImGui::NewLine();
             ImGui::NewLine();
         }
-
 
 
         //odwrocenia ekranu
@@ -259,8 +286,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameFL = false;
         }
-        if (ImGui::CollapsingHeader("Screen Filps"))
-        {
+        if (ImGui::CollapsingHeader("Screen Filps")) {
             //zamiana hotyzontalna
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Horizontal Swap");
@@ -283,35 +309,16 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameED = false;
         }
-        if (ImGui::CollapsingHeader("Edge Detection"))
-        {
+        if (ImGui::CollapsingHeader("Edge Detection")) {
             //dog
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Difference of Gaussian");
             ImGui::SameLine();
             ImGui::Checkbox("##dog_checkbox", &shadersData.dog);
-
-            /*ImGui::Text("Sigma");
-            ImGui::SameLine(labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderFloat("##dog_sigma_slider", &shadersData.sigma, 0.1f, 5.0f, "%.2f");
-            ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_sigma", ImVec2(buttonWidth, 0)))
-                shadersData.sigma = 1.0f;
 
-            ImGui::Text("Scale - k");
-            ImGui::SameLine(labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderFloat("##dog_scale_slider", &shadersData.scale, 1.0f, 5.0f, "%.2f");
-            ImGui::PopItemWidth();
-            ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_scale", ImVec2(buttonWidth, 0)))
-                shadersData.scale = 1.5f;*/
-
-            ImGui::Indent(guiData.offset);
-            if (ImGui::CollapsingHeader("Options"))
-            {
+            if (ImGui::CollapsingHeader("DoG Option")) {
+                ImGui::Indent(guiData.offset);
                 ImGui::Text("Brightness");
                 ImGui::SameLine(guiData.labelWidth);
                 ImGui::PushItemWidth(sliderWidth);
@@ -343,8 +350,8 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+                ImGui::Unindent(guiData.offset);
             }
-            ImGui::Unindent(guiData.offset);
 
             ImGui::NewLine();
             ImGui::NewLine();
@@ -356,8 +363,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameB = false;
         }
-        if (ImGui::CollapsingHeader("Blur"))
-        {
+        if (ImGui::CollapsingHeader("Blur")) {
             //blur
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Gaussian");
@@ -384,11 +390,20 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
 
 
     ImVec2 imguiSize = ImGui::GetWindowSize();
-    SetWindowPos(
-        hwnd, nullptr, 0, 0,
-        (int)imguiSize.x,(int)imguiSize.y,
-        SWP_NOMOVE | SWP_NOZORDER
-    );
+    if (!guiData.collapsed) {
+        SetWindowPos(
+            hwnd, nullptr, 0, 0,
+            (int)imguiSize.x, (int)imguiSize.y,
+            SWP_NOMOVE | SWP_NOZORDER
+        );
+    }
+    else {
+        SetWindowPos(
+            hwnd, nullptr, 0, 0,
+            (int)imguiSize.x, (int)guiData.titleBarHeight,
+            SWP_NOMOVE | SWP_NOZORDER
+        );
+    }
 
     ImGui::End();
 

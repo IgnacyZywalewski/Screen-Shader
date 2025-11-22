@@ -151,6 +151,8 @@ void Renderer::Update() {
     if (now - lastCapture >= captureInterval) {
         lastCapture = now;
 
+        shadersData.shaderTime = now / 1000.0f;
+
         CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
 
         if (wglMakeCurrent(HDCOverlay, GLContextOverlay)) {
@@ -179,8 +181,10 @@ void Renderer::RenderOverlay() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
+
         glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
         glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+        glUniform1f(glGetUniformLocation(shaderProgram, "time"), shadersData.shaderTime);
 
         glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
         glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
@@ -193,7 +197,10 @@ void Renderer::RenderOverlay() {
         
         glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
         glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
-        glUniform1f(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
+        glUniform1i(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
+        glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
         
         glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
         glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
@@ -219,6 +226,7 @@ void Renderer::RenderOverlay() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, dogTexture);
+
         glUniform1i(glGetUniformLocation(dogShaderProgram, "screenTex"), 0);
         glUniform2f(glGetUniformLocation(dogShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
 
@@ -245,6 +253,7 @@ void Renderer::RenderOverlay() {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, blurTexture);
+
         glUniform1i(glGetUniformLocation(blurShaderProgram, "screenTex"), 0);
         glUniform2f(glGetUniformLocation(blurShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
         

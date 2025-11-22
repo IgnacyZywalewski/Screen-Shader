@@ -4,6 +4,7 @@ in vec2 TexCoord; // (x,y)
 out vec4 FragColor; //(r,g,b,a)
 uniform sampler2D screenTex; //tekstura
 uniform vec2 pixelSize; //rozmiar pixela
+uniform float time;
 
 uniform float brightness;
 uniform float gamma;
@@ -17,6 +18,9 @@ uniform float blue;
 uniform bool colorInversion;
 uniform bool blackWhite;
 uniform bool emboss;
+
+uniform bool filmGrain;
+uniform float grainAmount;
 
 uniform bool vignette;
 uniform float vigRadius;
@@ -102,6 +106,19 @@ void applyVignetteFilter(out vec3 color) {
     color *= vignetteValue;
 }
 
+
+void applyFilmGrain(out vec3 color) {
+    vec3 p = fract(vec3(TexCoord * 800.0, time * 60.0) * 0.1031);
+    p += dot(p, p.yzx + 33.33);
+
+    float noise = fract((p.x + p.y) * p.z) - 0.5;
+
+    float luminance = dot(color, vec3(0.299, 0.587, 0.114));
+    float fade = 1.0 - luminance;
+
+    color += noise * grainAmount * fade;
+}
+
 void main() {
     vec2 uv = TexCoord;
     vec3 color = texture(screenTex, uv).rgb;
@@ -123,6 +140,9 @@ void main() {
 
     if(vignette)
         applyVignetteFilter(color);
+
+    if(filmGrain)
+        applyFilmGrain(color);
 
     FragColor = vec4(color, 1.0);
 }
