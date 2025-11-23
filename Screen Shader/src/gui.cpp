@@ -246,14 +246,15 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::Indent(guiData.offset);
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Radius");
-                ImGui::SameLine(guiData.labelWidth + guiData.offset);
-                ImGui::PushItemWidth(sliderWidth - guiData.offset);
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
                 ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.5f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.vigRadius = 1.0f;
                 ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
             }
 
             //grain
@@ -265,15 +266,40 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             if (ImGui::CollapsingHeader("Grain Option")) {
                 ImGui::Indent(guiData.offset);
                 ImGui::AlignTextToFramePadding();
-                ImGui::Text("Grain Amount");
-                ImGui::SameLine(guiData.labelWidth + guiData.offset);
-                ImGui::PushItemWidth(sliderWidth - guiData.offset);
+                ImGui::Text("Amount");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
                 ImGui::SliderFloat("##grain_amount_slider", &shadersData.grainAmount, 0.2f, 2.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_amount_size", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.grainAmount = 0.5f;
                 ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
+            //kuwahara
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Kuwahara filter");
+            ImGui::SameLine();
+            ImGui::Checkbox("##kuwahara_checkbox", &shadersData.kuwahara);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Kuwahara Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Radius");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderInt("##kuwahara_radius_slider", &shadersData.kuwaharaRadius, 2, 5);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_kuwahara_radius", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.kuwaharaRadius = 2;
+
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
             }
 
             ImGui::NewLine();
@@ -310,7 +336,6 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             guiData.firstFrameED = false;
         }
         if (ImGui::CollapsingHeader("Edge Detection")) {
-            //dog
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Difference of Gaussian");
             ImGui::SameLine();
@@ -322,20 +347,20 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::Text("Brightness");
                 ImGui::SameLine(guiData.labelWidth);
                 ImGui::PushItemWidth(sliderWidth);
-                ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 1.0f, "%.4f");
+                ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 1.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_threshold", ImVec2(guiData.buttonWidth, 0)))
-                    shadersData.threshold = 0.2f;
+                    shadersData.threshold = 0.5f;
 
                 ImGui::Text("Sharpness");
                 ImGui::SameLine(guiData.labelWidth);
                 ImGui::PushItemWidth(sliderWidth);
-                ImGui::SliderInt("##dog_tau_slider", &shadersData.tau, 0, 50);
+                ImGui::SliderFloat("##dog_tau_slider", &shadersData.tau, 0.5f, 50.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.buttonWidth, 0)))
-                    shadersData.tau = 10;
+                    shadersData.tau = 10.0f;
 
                 ImGui::Text("Color A");
                 ImGui::SameLine(guiData.labelWidth - 26.0f);

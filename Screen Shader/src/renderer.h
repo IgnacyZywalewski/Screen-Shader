@@ -27,14 +27,17 @@ struct ShadersData {
     bool filmGrain = false;
     float grainAmount = 0.5f;
 
+    bool kuwahara = false;
+    int kuwaharaRadius = 2;
+
     bool horizontalSwap = false;
     bool verticalSwap = false;
 
     bool dog = false;
-    float sigma = 0.5f;
+    float sigma = 1.4f;
     float scale = 1.5f;
-    float threshold = 0.2f;
-    int tau = 10;
+    float threshold = 0.5f;
+    float tau = 10.0f;
     ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     ImVec4 dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
     

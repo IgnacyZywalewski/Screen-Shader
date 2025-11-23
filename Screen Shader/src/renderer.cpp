@@ -201,6 +201,9 @@ void Renderer::RenderOverlay() {
 
         glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
         glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "kuwahara"), shadersData.kuwahara);
+        glUniform1i(glGetUniformLocation(shaderProgram, "kuwaharaRadius"), shadersData.kuwaharaRadius);
         
         glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
         glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
@@ -234,7 +237,7 @@ void Renderer::RenderOverlay() {
         glUniform1f(glGetUniformLocation(dogShaderProgram, "sigma"), shadersData.sigma);
         glUniform1f(glGetUniformLocation(dogShaderProgram, "scale"), shadersData.scale);
         glUniform1f(glGetUniformLocation(dogShaderProgram, "threshold"), shadersData.threshold);
-        glUniform1i(glGetUniformLocation(dogShaderProgram, "tau"), shadersData.tau);
+        glUniform1f(glGetUniformLocation(dogShaderProgram, "tau"), shadersData.tau);
         glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
         glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
 

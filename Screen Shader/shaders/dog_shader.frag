@@ -9,7 +9,7 @@ uniform bool dog;
 uniform float sigma;
 uniform float scale;   
 uniform float threshold;
-uniform int tau;
+uniform float tau;
 uniform vec4 dogColor1;
 uniform vec4 dogColor2;
 
