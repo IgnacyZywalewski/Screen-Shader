@@ -30,6 +30,9 @@ struct ShadersData {
     bool kuwahara = false;
     int kuwaharaRadius = 2;
 
+    bool pixel = false;
+    float pixelRadius = 0.0f;
+
     bool horizontalSwap = false;
     bool verticalSwap = false;
 

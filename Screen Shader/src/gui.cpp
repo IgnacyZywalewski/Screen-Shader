@@ -221,29 +221,30 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             //inwersja kolorow
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Negative");
-            ImGui::SameLine();
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##color_inversion_checkbox", &shadersData.colorInversion);
 
             //filtr czarno-bialy
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Black-White filter");
-            ImGui::SameLine();
+            ImGui::Text("Black-White");
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##black_white_checkbox", &shadersData.blackWhite);
 
             //emboss
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Emboss filter");
-            ImGui::SameLine();
+            ImGui::Text("Emboss");
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##emboss_checkbox", &shadersData.emboss);
 
             //vignette
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Vignette");
-            ImGui::SameLine();
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##vignette_checkbox", &shadersData.vignette);
             ImGui::SameLine();
             if (ImGui::CollapsingHeader("Vignette Option")) {
                 ImGui::Indent(guiData.offset);
+
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Radius");
                 ImGui::SameLine(guiData.labelWidth);
@@ -253,6 +254,7 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.vigRadius = 1.0f;
+
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
@@ -260,11 +262,12 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             //grain
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Film grain");
-            ImGui::SameLine();
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##grain_checkbox", &shadersData.filmGrain);
             ImGui::SameLine();
             if (ImGui::CollapsingHeader("Grain Option")) {
                 ImGui::Indent(guiData.offset);
+
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Amount");
                 ImGui::SameLine(guiData.labelWidth);
@@ -274,14 +277,15 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_amount_size", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.grainAmount = 0.5f;
+
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
 
             //kuwahara
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Kuwahara filter");
-            ImGui::SameLine();
+            ImGui::Text("Kuwahara");
+            ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##kuwahara_checkbox", &shadersData.kuwahara);
             ImGui::SameLine();
             if (ImGui::CollapsingHeader("Kuwahara Option")) {
@@ -302,6 +306,30 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::NewLine();
             }
 
+            //pikselizacja
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Pixel");
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::Checkbox("##pixel_checkbox", &shadersData.pixel);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Pixel Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Radius");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderFloat("##pixel_radius_slider", &shadersData.pixelRadius, 0.0f, 50.0f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_kuwahara_radius", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.pixelRadius = 0.0f;
+
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
             ImGui::NewLine();
             ImGui::NewLine();
         }
@@ -316,13 +344,13 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             //zamiana hotyzontalna
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Horizontal Swap");
-            ImGui::SameLine();
+            ImGui::SameLine(guiData.labelWidth + 20);
             ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
 
             //zamiana wertykalna
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Vertical Swap");
-            ImGui::SameLine();
+            ImGui::SameLine(guiData.labelWidth + 20);
             ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
 
             ImGui::NewLine();
@@ -392,15 +420,24 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
             //blur
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Gaussian");
-            ImGui::SameLine();
-            ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
             ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(sliderWidth);
-            ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
-            ImGui::PopItemWidth();
+            ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonWidth, 0)))
-                shadersData.blurRadius = 5;
+            if (ImGui::CollapsingHeader("Blur Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::Text("Radius");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.blurRadius = 5;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
 
             ImGui::NewLine();
             ImGui::NewLine();

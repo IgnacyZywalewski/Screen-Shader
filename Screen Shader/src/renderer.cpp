@@ -206,6 +206,9 @@ void Renderer::RenderOverlay() {
     glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
     glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
     glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
+
+    glUniform1i(glGetUniformLocation(shaderProgram, "pixel"), shadersData.pixel);
+    glUniform1f(glGetUniformLocation(shaderProgram, "pixelRadius"), shadersData.pixelRadius);
         
 
     glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
