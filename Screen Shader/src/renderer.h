@@ -67,13 +67,16 @@ private:
     void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height);
 
     GLuint screenTexture = 0;
+    GLuint kuwaharaTexture = 0;
     GLuint dogTexture = 0;
     GLuint blurTexture = 0;
 
     GLuint shaderProgram = 0;
+    GLuint kuwaharaShaderProgram = 0;
     GLuint dogShaderProgram = 0;
     GLuint blurShaderProgram = 0;
 
+    GLuint kuwaharaFbo = 0;
     GLuint blurFbo = 0;
     GLuint dogFbo = 0;
     

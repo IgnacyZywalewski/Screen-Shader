@@ -109,6 +109,9 @@
     <None Include="shaders\dog_shader.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\kuwahara_shader.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fa_solid_900.ttf">

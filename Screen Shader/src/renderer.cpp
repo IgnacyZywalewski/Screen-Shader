@@ -36,10 +36,12 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
 
     std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
     std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
+    std::string kuwaharaFragShader = LoadShaderFromFile("shaders/kuwahara_shader.frag");
     std::string dogFragShader = LoadShaderFromFile("shaders/dog_shader.frag");
     std::string blurFragShader = LoadShaderFromFile("shaders/blur_shader.frag");
 
     shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
+    kuwaharaShaderProgram = CreateShaderProgram(vertexShader.c_str(), kuwaharaFragShader.c_str());
     dogShaderProgram = CreateShaderProgram(vertexShader.c_str(), dogFragShader.c_str());
     blurShaderProgram = CreateShaderProgram(vertexShader.c_str(), blurFragShader.c_str());
 
@@ -68,45 +70,44 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
     glBindVertexArray(0);
 
     if (!screenPacked.empty()) {
+
         glGenTextures(1, &screenTexture);
         glBindTexture(GL_TEXTURE_2D, screenTexture);
+
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        auto CreateFBO = [&](GLuint& tex, GLuint& fbo) {
+            glGenTextures(1, &tex);
+            glBindTexture(GL_TEXTURE_2D, tex);
+
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glGenFramebuffers(1, &fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+                MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
+        };
+
+        // kuwhara
+        CreateFBO(kuwaharaTexture, kuwaharaFbo);
+
+        // dog
+        CreateFBO(dogTexture, dogFbo);
+
+        // blur
+        CreateFBO(blurTexture, blurFbo);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        //dog fbo
-        glGenTextures(1, &dogTexture);
-        glBindTexture(GL_TEXTURE_2D, dogTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, screenPacked.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glGenFramebuffers(1, &dogFbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, dogTexture, 0);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            MessageBoxA(nullptr, "Dog FBO not complete!", "Error", MB_OK);
-        }
-
-        //blur fbo
-        glGenTextures(1, &blurTexture);
-        glBindTexture(GL_TEXTURE_2D, blurTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, screenPacked.data());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glGenFramebuffers(1, &blurFbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurTexture, 0);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            MessageBoxA(nullptr, "Blur FBO not complete!", "Error", MB_OK);
-        }
     }
 
     return true;
@@ -142,7 +143,6 @@ bool Renderer::InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
     return true;
 }
 
-
 void Renderer::Update() {
     static ULONGLONG lastCapture = GetTickCount64();
     const ULONGLONG captureInterval = 4;
@@ -166,107 +166,126 @@ void Renderer::Update() {
     }
 }
 
-
 void Renderer::RenderOverlay() {
     wglMakeCurrent(HDCOverlay, GLContextOverlay);
 
-    if (screenTexture != 0) {
-        //pass 1 - jasnosc, kontrast, kolory itp...
-        glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
-        glViewport(0, 0, screenWidth, screenHeight);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+    if (screenTexture == 0) 
+        return;
 
-        glUseProgram(shaderProgram);
+    //pass 1 - jasnosc, kontrast, kolory itp...
+    glBindFramebuffer(GL_FRAMEBUFFER, kuwaharaFbo);
+    glViewport(0, 0, screenWidth, screenHeight);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
+    glUseProgram(shaderProgram);
 
-        glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
-        glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
-        glUniform1f(glGetUniformLocation(shaderProgram, "time"), shadersData.shaderTime);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
 
-        glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
-        glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
-        glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
-        glUniform1f(glGetUniformLocation(shaderProgram, "saturation"), shadersData.saturation);
+    glUniform1i(glGetUniformLocation(shaderProgram, "screenTex"), 0);
+    glUniform2f(glGetUniformLocation(shaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+    glUniform1f(glGetUniformLocation(shaderProgram, "time"), shadersData.shaderTime);
+
+    glUniform1f(glGetUniformLocation(shaderProgram, "brightness"), shadersData.brightness);
+    glUniform1f(glGetUniformLocation(shaderProgram, "gamma"), shadersData.gamma);
+    glUniform1f(glGetUniformLocation(shaderProgram, "contrast"), shadersData.contrast);
+    glUniform1f(glGetUniformLocation(shaderProgram, "saturation"), shadersData.saturation);
         
-        glUniform1f(glGetUniformLocation(shaderProgram, "red"), shadersData.red);
-        glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
-        glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
+    glUniform1f(glGetUniformLocation(shaderProgram, "red"), shadersData.red);
+    glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
+    glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
         
-        glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
-        glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
-        glUniform1i(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
+    glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
+    glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
+    glUniform1i(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
 
-        glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
-        glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
-
-        glUniform1i(glGetUniformLocation(shaderProgram, "kuwahara"), shadersData.kuwahara);
-        glUniform1i(glGetUniformLocation(shaderProgram, "kuwaharaRadius"), shadersData.kuwaharaRadius);
+    glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
+    glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
         
-        glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
-        glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
-        glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
+    glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
+    glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
+    glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
         
 
-        glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
-        glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+    //pass 2 - kuwahara
+    glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
+    glViewport(0, 0, screenWidth, screenHeight);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(kuwaharaShaderProgram);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, kuwaharaTexture);
+
+    glUniform1i(glGetUniformLocation(kuwaharaShaderProgram, "screenTex"), 0);
+    glUniform2f(glGetUniformLocation(kuwaharaShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+
+    glUniform1i(glGetUniformLocation(kuwaharaShaderProgram, "kuwahara"), shadersData.kuwahara);
+    glUniform1i(glGetUniformLocation(kuwaharaShaderProgram, "kuwaharaRadius"), shadersData.kuwaharaRadius);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 
 
-        //pass 2 - dog
-        glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
-        glViewport(0, 0, screenWidth, screenHeight);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+    //pass 3 - dog
+    glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
+    glViewport(0, 0, screenWidth, screenHeight);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(dogShaderProgram);
+    glUseProgram(dogShaderProgram);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, dogTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, dogTexture);
 
-        glUniform1i(glGetUniformLocation(dogShaderProgram, "screenTex"), 0);
-        glUniform2f(glGetUniformLocation(dogShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+    glUniform1i(glGetUniformLocation(dogShaderProgram, "screenTex"), 0);
+    glUniform2f(glGetUniformLocation(dogShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
 
-        glUniform1i(glGetUniformLocation(dogShaderProgram, "dog"), shadersData.dog);
-        glUniform1f(glGetUniformLocation(dogShaderProgram, "sigma"), shadersData.sigma);
-        glUniform1f(glGetUniformLocation(dogShaderProgram, "scale"), shadersData.scale);
-        glUniform1f(glGetUniformLocation(dogShaderProgram, "threshold"), shadersData.threshold);
-        glUniform1f(glGetUniformLocation(dogShaderProgram, "tau"), shadersData.tau);
-        glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
-        glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
+    glUniform1i(glGetUniformLocation(dogShaderProgram, "dog"), shadersData.dog);
+    glUniform1f(glGetUniformLocation(dogShaderProgram, "sigma"), shadersData.sigma);
+    glUniform1f(glGetUniformLocation(dogShaderProgram, "scale"), shadersData.scale);
+    glUniform1f(glGetUniformLocation(dogShaderProgram, "threshold"), shadersData.threshold);
+    glUniform1f(glGetUniformLocation(dogShaderProgram, "tau"), shadersData.tau);
+    glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
+    glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 
 
-        //pass 3 - blur
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, screenWidth, screenHeight);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
+    //pass 4 - blur
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, screenWidth, screenHeight);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(blurShaderProgram);
+    glUseProgram(blurShaderProgram);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, blurTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, blurTexture);
 
-        glUniform1i(glGetUniformLocation(blurShaderProgram, "screenTex"), 0);
-        glUniform2f(glGetUniformLocation(blurShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+    glUniform1i(glGetUniformLocation(blurShaderProgram, "screenTex"), 0);
+    glUniform2f(glGetUniformLocation(blurShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
         
-        glUniform1f(glGetUniformLocation(blurShaderProgram, "blur"), shadersData.blur);
-        glUniform1i(glGetUniformLocation(blurShaderProgram, "blurRadius"), shadersData.blurRadius);
+    glUniform1f(glGetUniformLocation(blurShaderProgram, "blur"), shadersData.blur);
+    glUniform1i(glGetUniformLocation(blurShaderProgram, "blurRadius"), shadersData.blurRadius);
 
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-    }
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+    
 
     SwapBuffers(HDCOverlay);
 }
@@ -327,7 +346,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biHeight = height;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
