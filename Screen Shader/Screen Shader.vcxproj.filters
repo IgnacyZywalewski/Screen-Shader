@@ -112,6 +112,9 @@
     <None Include="shaders\kuwahara_shader.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="shaders\pixelate_shader.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fa_solid_900.ttf">

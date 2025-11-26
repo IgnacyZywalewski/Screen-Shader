@@ -19,8 +19,6 @@ struct GUIData {
     bool firstFrameCC = true;
     bool firstFrameFIL = true;
     bool firstFrameFL = true;
-    bool firstFrameED = true;
-    bool firstFrameB = true;
 
 };
 

@@ -53,6 +53,7 @@
   <ItemGroup>
     <None Include="shaders\blur_shader.frag" />
     <None Include="shaders\dog_shader.frag" />
+    <None Include="shaders\pixelate_shader.frag" />
     <None Include="shaders\screen_shader.frag" />
     <None Include="shaders\screen_shader.vert" />
   </ItemGroup>
@@ -187,8 +188,14 @@
       <AdditionalDependencies>opengl32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Release\shaders"
+copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Release\assets" 
+copy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Debug\shaders"
+copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Debug\assets" 
+/E
+EXIT /B 0
+
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

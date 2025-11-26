@@ -30,8 +30,8 @@ struct ShadersData {
     bool kuwahara = false;
     int kuwaharaRadius = 2;
 
-    bool pixel = false;
-    float pixelRadius = 0.0f;
+    bool pixelate = false;
+    int chunk = 256;
 
     bool horizontalSwap = false;
     bool verticalSwap = false;
@@ -70,15 +70,18 @@ private:
     void CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int height);
 
     GLuint screenTexture = 0;
+    GLuint pixelateTexture = 0;
     GLuint kuwaharaTexture = 0;
     GLuint dogTexture = 0;
     GLuint blurTexture = 0;
 
     GLuint shaderProgram = 0;
+    GLuint pixelateShaderProgram = 0;
     GLuint kuwaharaShaderProgram = 0;
     GLuint dogShaderProgram = 0;
     GLuint blurShaderProgram = 0;
 
+    GLuint pixelateFbo = 0;
     GLuint kuwaharaFbo = 0;
     GLuint blurFbo = 0;
     GLuint dogFbo = 0;

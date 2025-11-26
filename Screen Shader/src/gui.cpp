@@ -10,10 +10,6 @@ bool GUI::Init(HWND hwnd, Renderer& renderer) {
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
 
-    /*if (!wglShareLists(renderer.GLContextOverlay, GLContextGUI)) {
-        MessageBox(hwnd, L"Nie udało się współdzielić kontekstów OpenGL!", L"Błąd", MB_OK);
-    }*/
-
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
@@ -282,6 +278,29 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::NewLine();
             }
 
+            //pikselizacja
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Pixelate");
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::Checkbox("##pixel_checkbox", &shadersData.pixelate);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Pixel Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Size");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(sliderWidth);
+                ImGui::SliderInt("##pixel_chunk_slider", &shadersData.chunk, 32, 512);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pixel_chunk_radius", ImVec2(guiData.buttonWidth, 0)))
+                    shadersData.chunk = 256;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
             //kuwahara
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Kuwahara");
@@ -306,70 +325,12 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::NewLine();
             }
 
-            //pikselizacja
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Pixel");
-            ImGui::SameLine(guiData.labelWidth);
-            ImGui::Checkbox("##pixel_checkbox", &shadersData.pixel);
-            ImGui::SameLine();
-            if (ImGui::CollapsingHeader("Pixel Option")) {
-                ImGui::Indent(guiData.offset);
-
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Radius");
-                ImGui::SameLine(guiData.labelWidth);
-                ImGui::PushItemWidth(sliderWidth);
-                ImGui::SliderFloat("##pixel_radius_slider", &shadersData.pixelRadius, 0.0f, 50.0f, "%.2f");
-                ImGui::PopItemWidth();
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_kuwahara_radius", ImVec2(guiData.buttonWidth, 0)))
-                    shadersData.pixelRadius = 0.0f;
-
-
-                ImGui::Unindent(guiData.offset);
-                ImGui::NewLine();
-            }
-
-            ImGui::NewLine();
-            ImGui::NewLine();
-        }
-
-
-        //odwrocenia ekranu
-        if (guiData.firstFrameFL) {
-            ImGui::SetNextItemOpen(true);
-            guiData.firstFrameFL = false;
-        }
-        if (ImGui::CollapsingHeader("Screen Filps")) {
-            //zamiana hotyzontalna
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Horizontal Swap");
-            ImGui::SameLine(guiData.labelWidth + 20);
-            ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
-
-            //zamiana wertykalna
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Vertical Swap");
-            ImGui::SameLine(guiData.labelWidth + 20);
-            ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
-
-            ImGui::NewLine();
-            ImGui::NewLine();
-        }
-
-
-        //Wykrywanie krawedzi
-        if (guiData.firstFrameED) {
-            ImGui::SetNextItemOpen(true);
-            guiData.firstFrameED = false;
-        }
-        if (ImGui::CollapsingHeader("Edge Detection")) {
+            //dog
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Difference of Gaussian");
             ImGui::SameLine();
             ImGui::Checkbox("##dog_checkbox", &shadersData.dog);
             ImGui::SameLine();
-
             if (ImGui::CollapsingHeader("DoG Option")) {
                 ImGui::Indent(guiData.offset);
                 ImGui::Text("Brightness");
@@ -403,20 +364,11 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonWidth, 0)))
                     shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+
                 ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
             }
 
-            ImGui::NewLine();
-            ImGui::NewLine();
-        }
-
-
-        //Blur
-        if (guiData.firstFrameB) {
-            ImGui::SetNextItemOpen(true);
-            guiData.firstFrameB = false;
-        }
-        if (ImGui::CollapsingHeader("Blur")) {
             //blur
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Gaussian");
@@ -438,6 +390,30 @@ void GUI::Render(HWND hwnd, ShadersData& shadersData) {
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
+
+            
+            ImGui::NewLine();
+            ImGui::NewLine();
+        }
+
+
+        //odwrocenia ekranu
+        if (guiData.firstFrameFL) {
+            ImGui::SetNextItemOpen(true);
+            guiData.firstFrameFL = false;
+        }
+        if (ImGui::CollapsingHeader("Screen Filps")) {
+            //zamiana hotyzontalna
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Horizontal Swap");
+            ImGui::SameLine(guiData.labelWidth + 20);
+            ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
+
+            //zamiana wertykalna
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Vertical Swap");
+            ImGui::SameLine(guiData.labelWidth + 20);
+            ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
 
             ImGui::NewLine();
             ImGui::NewLine();

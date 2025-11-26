@@ -26,9 +26,6 @@ uniform bool vignette;
 uniform float vigRadius;
 uniform float vigSmoothness;
 
-uniform bool pixel;
-uniform float pixelRadius;
-
 
 void forceKeepUniforms() {
     float dummy = brightness + gamma + contrast + saturation + red + green + blue;
