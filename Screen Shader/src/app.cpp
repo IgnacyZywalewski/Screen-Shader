@@ -1,6 +1,7 @@
-﻿#include "app.h"
-#include <vector>
+﻿#include <vector>
 #include <cassert>
+
+#include "app.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -57,6 +58,7 @@ void App::Run() {
 
     SetLayeredWindowAttributes(hwndOverlay, 0, 255, LWA_ALPHA);
     ShowWindow(hwndOverlay, SW_SHOW);
+    SetWindowDisplayAffinity(hwndOverlay, WDA_EXCLUDEFROMCAPTURE);
 
 
     //klasa gui
@@ -73,8 +75,6 @@ void App::Run() {
         nullptr, nullptr, hInstance, nullptr
     );
     ShowWindow(hwndGUI, SW_SHOW);
-
-    SetWindowDisplayAffinity(hwndOverlay, WDA_EXCLUDEFROMCAPTURE);
     SetWindowDisplayAffinity(hwndGUI, WDA_EXCLUDEFROMCAPTURE);
 
 
@@ -83,7 +83,7 @@ void App::Run() {
         return;
     }
 
-    if (!gui.Init(hwndGUI, renderer)) {
+    if (!gui.Init(hwndGUI)) {
         MessageBox(hwndGUI, L"Init GUI OpenGL failed", L"Error", MB_OK);
         return;
     }
@@ -99,7 +99,7 @@ void App::Run() {
 
         renderer.Update();
         renderer.RenderOverlay();
-        gui.Render(hwndGUI, renderer.shadersData);
+        gui.Render(hwndGUI);
     }
 
     gui.Close();

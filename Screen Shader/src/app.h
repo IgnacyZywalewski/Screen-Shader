@@ -1,5 +1,6 @@
 #pragma once
-#include <Windows.h>
+#include <windows.h>
+
 #include "renderer.h"
 #include "gui.h"
 
@@ -10,6 +11,7 @@ public:
 
 private:
     HINSTANCE hInstance;
+
     Renderer renderer;
     GUI gui;
 

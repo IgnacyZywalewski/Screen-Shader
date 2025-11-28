@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\icons_font_awesome_6.h" />
+    <ClInclude Include="src\data.h" />
     <ClInclude Include="imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\backends\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="imgui\backends\imgui_impl_win32.h" />
@@ -31,9 +32,12 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="src\app.h" />
     <ClInclude Include="src\gui.h" />
+    <ClInclude Include="src\helpers.h" />
     <ClInclude Include="src\renderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\helpers.cpp" />
+    <ClCompile Include="src\data.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -192,7 +196,8 @@
 copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Release\assets" 
 copy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Debug\shaders"
 copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Debug\assets" 
-/E
+copy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Release\saves"
+copy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Debug\saves" 
 EXIT /B 0
 
 </Command>

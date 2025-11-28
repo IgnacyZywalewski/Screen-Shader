@@ -57,6 +57,12 @@
     <ClInclude Include="assets\icons_font_awesome_6.h">
       <Filter>assets</Filter>
     </ClInclude>
+    <ClInclude Include="src\data.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helpers.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -93,6 +99,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\gui.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\data.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helpers.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
