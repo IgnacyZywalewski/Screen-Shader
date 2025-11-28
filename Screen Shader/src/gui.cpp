@@ -1,6 +1,7 @@
 ﻿#include "gui.h"
 
 #include <string>
+#include <filesystem>
 
 bool GUI::Init(HWND hwnd) {
     if (!InitOpenGL(hwnd, HDCGUI, GLContextGUI))
@@ -50,7 +51,7 @@ void GUI::Render(HWND hwnd) {
     }
     //ImGui::SetNextWindowSizeConstraints(ImVec2(250, guiData.titleBarHeight), ImVec2(FLT_MAX, FLT_MAX));
 
-  
+
     ImGui::Begin("Screen Shader", nullptr, flags);
     {
         //przeciaganie
@@ -389,7 +390,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
-            
+
             ImGui::NewLine();
             ImGui::NewLine();
         }
@@ -415,30 +416,82 @@ void GUI::Render(HWND hwnd) {
 
             ImGui::NewLine();
         }
-        
+
         ImGui::EndChild();
 
 
-
-        //footer
+        // FOOTER
         ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
         ImGui::Separator();
-        
+
         float centerY = (guiData.footerBarHeight - guiData.buttonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
         ImGui::SetCursorPosY(centerY);
 
         float buttonWidth = ImGui::GetContentRegionAvail().x / 3;
-        
-        ImGui::Button((std::string("Settings " ICON_FA_GEAR)).c_str(), ImVec2(buttonWidth - 10, guiData.buttonSize));
+         
+        static std::string currentSave = LoadLastSave();
+        if (guiData.firstFrame) {
+            LoadSettings(currentSave);
+            guiData.firstFrame = false;
+        }
+        std::vector<std::string> saves = GetSaveList();
+
+
+        std::string comboName = currentSave != "default" ? currentSave : "Settings";
+
+        ImGui::PushItemWidth(buttonWidth);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, (guiData.buttonSize - ImGui::GetFontSize()) * 0.5f));
+        if (ImGui::BeginCombo("##settings", comboName.c_str()))
+        {
+            for (auto& file : saves)
+            {
+                bool isSelected = (file == currentSave);
+                if (ImGui::Selectable(file.c_str(), isSelected))
+                {
+                    currentSave = file;
+                    LoadSettings(currentSave);
+                    SaveLastSave(currentSave);
+                }
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::Selectable("+ Add new profile"))
+            {
+                std::string newName = "Profile " + std::to_string(saves.size() + 1);
+
+                shadersData = ShadersData();
+                guiData = GUIData();
+
+                SaveSettings(newName, shadersData, guiData);
+                currentSave = newName;
+
+                saves = GetSaveList();
+            }
+
+            ImGui::EndCombo();
+        }
+        ImGui::PopStyleVar();
+        ImGui::PopItemWidth();
+
         ImGui::SameLine();
-        ImGui::Button((std::string("Save " ICON_FA_FLOPPY_DISK)).c_str(), ImVec2(buttonWidth - 30, guiData.buttonSize));
+
+        if (ImGui::Button((std::string("Save ") + ICON_FA_FLOPPY_DISK).c_str(), ImVec2(buttonWidth - 20.0f, guiData.buttonSize))) {
+            if(currentSave != "default")
+                SaveSettings(currentSave, shadersData, guiData);
+        }
+
         ImGui::SameLine();
-        ImGui::Button((std::string("Print Screen " ICON_FA_CAMERA)).c_str(), ImVec2(buttonWidth + 40, guiData.buttonSize));
+
+        ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth, guiData.buttonSize));
 
         ImGui::EndChild();
 
-
     }
+
+     
     else {
         ImGui::SetWindowSize(ImVec2(ImGui::GetWindowSize().x, guiData.titleBarHeight));
     }
@@ -465,6 +518,7 @@ void GUI::Render(HWND hwnd) {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     SwapBuffers(HDCGUI);
+    
 }
 
 void GUI::Close() {

@@ -192,12 +192,12 @@
       <AdditionalDependencies>opengl32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Release\shaders"
-copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Release\assets" 
-copy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Debug\shaders"
-copy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Debug\assets" 
-copy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Release\saves"
-copy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Debug\saves" 
+      <Command>xcopy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Release\shaders" /E /I /Y
+xcopy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Release\assets" /E /I /Y
+xcopy "$(SolutionDir)Screen Shader\shaders" "$(SolutionDir)x64\Debug\shaders" /E /I /Y
+xcopy "$(SolutionDir)Screen Shader\assets" "$(SolutionDir)x64\Debug\assets" /E /I /Y
+xcopy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Release\saves" /E /I /Y
+xcopy "$(SolutionDir)Screen Shader\saves" "$(SolutionDir)x64\Debug\saves" /E /I /Y 
 EXIT /B 0
 
 </Command>

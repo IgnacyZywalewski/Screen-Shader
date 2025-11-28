@@ -16,6 +16,9 @@
     <Filter Include="assets">
       <UniqueIdentifier>{61035c3e-b6da-46ac-813c-da0bf576dbb9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="library">
+      <UniqueIdentifier>{1d20fae3-6a50-46b8-ba4d-e516630d382b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="imgui\imconfig.h">
@@ -86,9 +89,6 @@
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\backends</Filter>
     </ClCompile>
-    <ClCompile Include="src\glad.c">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -106,6 +106,9 @@
     </ClCompile>
     <ClCompile Include="src\helpers.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\glad.c">
+      <Filter>library</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

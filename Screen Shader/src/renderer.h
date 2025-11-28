@@ -12,7 +12,6 @@
 class Renderer {
 public:
     bool Init(HWND hwndOverlay, HWND hwndGUI, int width, int height);
-    //bool InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext);
     void Update();
     void RenderOverlay();
     void Close(HWND hwndOverlay, HWND hwndGUI);
