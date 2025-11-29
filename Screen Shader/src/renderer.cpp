@@ -3,6 +3,35 @@
 #include <cassert>
 #include <string>
 
+#include <filesystem>
+#include <vector>
+#include <ctime>
+#include <iostream>
+#include "stb_image_write.h"
+
+
+void Renderer::SaveTextureScreenshot() {
+    if (lastPixels.empty()) return;
+
+    std::filesystem::create_directories("screenshots");
+
+    for (int y = 0; y < screenHeight / 2; ++y) {
+        for (int x = 0; x < screenWidth * 4; ++x) {
+            std::swap(lastPixels[y * screenWidth * 4 + x], lastPixels[(screenHeight - 1 - y) * screenWidth * 4 + x]);
+        }
+    }
+
+    char filename[128];
+    std::time_t t = std::time(nullptr);
+    std::tm tm{};
+    localtime_s(&tm, &t);
+    std::strftime(filename, sizeof(filename), "screenshots/screenshot_%Y-%m-%d_%H-%M-%S.png", &tm);
+
+    stbi_write_png(filename, screenWidth, screenHeight, 4, lastPixels.data(), screenWidth * 4);
+}
+
+
+
 bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
     screenWidth = width;
     screenHeight = height;
@@ -266,6 +295,9 @@ void Renderer::RenderOverlay() {
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+    lastPixels.resize(screenWidth* screenHeight * 4);
+    glReadPixels(0, 0, screenWidth, screenHeight, GL_RGBA, GL_UNSIGNED_BYTE, lastPixels.data());
     
 
     SwapBuffers(HDCOverlay);
@@ -316,14 +348,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     HBITMAP hBmp = CreateCompatibleBitmap(hdcScreen, width, height);
     HBITMAP hOld = (HBITMAP)SelectObject(hdcMem, hBmp);
 
-    if (!BitBlt(hdcMem, 0, 0, width, height, hdcScreen, 0, 0, SRCCOPY)) {
-        SelectObject(hdcMem, hOld);
-        DeleteObject(hBmp);
-        DeleteDC(hdcMem);
-        ReleaseDC(nullptr, hdcScreen);
-        outPacked.clear();
-        return;
-    }
+    BitBlt(hdcMem, 0, 0, width, height, hdcScreen, 0, 0, SRCCOPY);
 
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -337,17 +362,9 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     int stride = ((width * bytesPerPixel + 3) / 4) * 4;
     std::vector<BYTE> tmp(stride * height);
 
-    if (GetDIBits(hdcMem, hBmp, 0, height, tmp.data(), &bmi, DIB_RGB_COLORS) == 0) {
-        SelectObject(hdcMem, hOld);
-        DeleteObject(hBmp);
-        DeleteDC(hdcMem);
-        ReleaseDC(nullptr, hdcScreen);
-        outPacked.clear();
-        return;
-    }
+    GetDIBits(hdcMem, hBmp, 0, height, tmp.data(), &bmi, DIB_RGB_COLORS);
 
     outPacked.resize(width * height * 3);
-
     for (int y = 0; y < height; y++)
         memcpy(&outPacked[y * width * 3], &tmp[y * stride], width * 3);
 
@@ -355,6 +372,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     DeleteObject(hBmp);
     DeleteDC(hdcMem);
     ReleaseDC(nullptr, hdcScreen);
+
 }
 
 void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {

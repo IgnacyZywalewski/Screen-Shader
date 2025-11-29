@@ -1,5 +1,6 @@
 ﻿.vs/
 x64/
-"Screen Shader"/x64
+Screen Shader/x64
 *.ini
-"Screen Shader"/saves/
+Screen Shader/screenshots/
+Screen Shader/saves/

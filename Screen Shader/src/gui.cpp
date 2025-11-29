@@ -3,6 +3,7 @@
 #include <string>
 #include <filesystem>
 
+
 bool GUI::Init(HWND hwnd) {
     if (!InitOpenGL(hwnd, HDCGUI, GLContextGUI))
         return false;
@@ -30,7 +31,7 @@ bool GUI::Init(HWND hwnd) {
     return true;
 }
 
-void GUI::Render(HWND hwnd) {
+void GUI::Render(HWND hwnd, Renderer& renderer) {
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -49,7 +50,6 @@ void GUI::Render(HWND hwnd) {
     if (guiData.firstFrame) {
         ImGui::SetNextWindowSize(ImVec2(guiData.windowWidth, guiData.windowHeight));
     }
-    //ImGui::SetNextWindowSizeConstraints(ImVec2(250, guiData.titleBarHeight), ImVec2(FLT_MAX, FLT_MAX));
 
 
     ImGui::Begin("Screen Shader", nullptr, flags);
@@ -324,6 +324,28 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
+            //blur
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Blur");
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Blur Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::Text("Radius");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(guiData.sliderWidth);
+                ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonSize, 0)))
+                    shadersData.blurRadius = 5;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
             //dog
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Difference of Gaussian");
@@ -368,29 +390,6 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
-            //blur
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Blur");
-            ImGui::SameLine(guiData.labelWidth);
-            ImGui::Checkbox("##blur_checkbox", &shadersData.blur);
-            ImGui::SameLine();
-            if (ImGui::CollapsingHeader("Blur Option")) {
-                ImGui::Indent(guiData.offset);
-
-                ImGui::Text("Radius");
-                ImGui::SameLine(guiData.labelWidth);
-                ImGui::PushItemWidth(guiData.sliderWidth);
-                ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
-                ImGui::PopItemWidth();
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonSize, 0)))
-                    shadersData.blurRadius = 5;
-
-                ImGui::Unindent(guiData.offset);
-                ImGui::NewLine();
-            }
-
-
             ImGui::NewLine();
             ImGui::NewLine();
         }
@@ -420,37 +419,45 @@ void GUI::Render(HWND hwnd) {
         ImGui::EndChild();
 
 
-        // FOOTER
+        // footer
         ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
         ImGui::Separator();
 
         float centerY = (guiData.footerBarHeight - guiData.buttonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
         ImGui::SetCursorPosY(centerY);
 
-        float buttonWidth = ImGui::GetContentRegionAvail().x / 3;
-         
-        static std::string currentSave = LoadLastSave();
+        float buttonWidth = ImGui::GetContentRegionAvail().x / 2;
+
+        std::vector<std::string> saves = GetSaveList();
+        static std::string currentSave;
+
         if (guiData.firstFrame) {
-            LoadSettings(currentSave);
+            if (!saves.empty()) {
+                if (currentSave.empty()) {
+                    currentSave = saves[0];
+                    LoadSettings(currentSave);
+                }
+            }
+            else {
+                currentSave = "default";
+            }
             guiData.firstFrame = false;
         }
-        std::vector<std::string> saves = GetSaveList();
 
+        std::string comboName = currentSave != "default" ? std::string("Settings: " + currentSave) : "Settings";
 
-        std::string comboName = currentSave != "default" ? currentSave : "Settings";
-
-        ImGui::PushItemWidth(buttonWidth);
+        ImGui::PushItemWidth(buttonWidth + 10);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, (guiData.buttonSize - ImGui::GetFontSize()) * 0.5f));
-        if (ImGui::BeginCombo("##settings", comboName.c_str()))
-        {
-            for (auto& file : saves)
-            {
+        if (ImGui::BeginCombo("##settings", comboName.c_str())) {
+            for (auto& file : saves) {
                 bool isSelected = (file == currentSave);
-                if (ImGui::Selectable(file.c_str(), isSelected))
-                {
+
+                if (ImGui::Selectable(file.c_str(), isSelected)) {
+                    if (currentSave != "default") 
+                        SaveSettings(currentSave, shadersData, guiData);
+
                     currentSave = file;
                     LoadSettings(currentSave);
-                    SaveLastSave(currentSave);
                 }
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
@@ -458,8 +465,10 @@ void GUI::Render(HWND hwnd) {
 
             ImGui::Separator();
 
-            if (ImGui::Selectable("+ Add new profile"))
-            {
+            if (ImGui::Selectable("+ Add new profile")) {
+                if (currentSave != "default")
+                    SaveSettings(currentSave, shadersData, guiData);
+
                 std::string newName = "Profile " + std::to_string(saves.size() + 1);
 
                 shadersData = ShadersData();
@@ -467,7 +476,6 @@ void GUI::Render(HWND hwnd) {
 
                 SaveSettings(newName, shadersData, guiData);
                 currentSave = newName;
-
                 saves = GetSaveList();
             }
 
@@ -478,20 +486,13 @@ void GUI::Render(HWND hwnd) {
 
         ImGui::SameLine();
 
-        if (ImGui::Button((std::string("Save ") + ICON_FA_FLOPPY_DISK).c_str(), ImVec2(buttonWidth - 20.0f, guiData.buttonSize))) {
-            if(currentSave != "default")
-                SaveSettings(currentSave, shadersData, guiData);
+        if (ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth - 10, guiData.buttonSize))) {
+            renderer.SaveTextureScreenshot();
         }
 
-        ImGui::SameLine();
-
-        ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth, guiData.buttonSize));
-
         ImGui::EndChild();
-
     }
 
-     
     else {
         ImGui::SetWindowSize(ImVec2(ImGui::GetWindowSize().x, guiData.titleBarHeight));
     }

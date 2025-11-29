@@ -99,7 +99,7 @@ void App::Run() {
 
         renderer.Update();
         renderer.RenderOverlay();
-        gui.Render(hwndGUI);
+        gui.Render(hwndGUI, renderer);
     }
 
     gui.Close();
