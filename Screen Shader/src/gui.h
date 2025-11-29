@@ -9,13 +9,12 @@
 
 #include "data.h"
 #include "helpers.h"
-#include "renderer.h"
 
 
 class GUI{
 public:
     bool Init(HWND hwnd);
-    void Render(HWND hwnd, Renderer& renderer);
+    void Render(HWND hwnd);
     void Close();
 
 private:

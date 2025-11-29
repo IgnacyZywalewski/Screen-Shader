@@ -19,6 +19,4 @@ void DeleteSave(const std::string& saveName);
 
 std::vector<std::string> GetSaveList();
 
-std::string LoadLastSave();
-
-void SaveLastSave(const std::string& saveName);
+void SaveTextureScreenshot();

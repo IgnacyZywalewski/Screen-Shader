@@ -14,7 +14,6 @@ public:
     bool Init(HWND hwndOverlay, HWND hwndGUI, int width, int height);
     void Update();
     void RenderOverlay();
-    void SaveTextureScreenshot();
     void Close(HWND hwndOverlay, HWND hwndGUI);
 
     HGLRC GLContextOverlay = nullptr;
@@ -45,7 +44,6 @@ private:
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
     std::vector<BYTE> screenPacked;
-    std::vector<BYTE> lastPixels;
 
     int screenWidth = 0;
     int screenHeight = 0;

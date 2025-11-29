@@ -31,7 +31,7 @@ bool GUI::Init(HWND hwnd) {
     return true;
 }
 
-void GUI::Render(HWND hwnd, Renderer& renderer) {
+void GUI::Render(HWND hwnd) {
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -487,7 +487,7 @@ void GUI::Render(HWND hwnd, Renderer& renderer) {
         ImGui::SameLine();
 
         if (ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth - 10, guiData.buttonSize))) {
-            renderer.SaveTextureScreenshot();
+            SaveTextureScreenshot();
         }
 
         ImGui::EndChild();

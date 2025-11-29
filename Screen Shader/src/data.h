@@ -1,5 +1,7 @@
 #pragma once
 #include "imgui/imgui.h"
+#include <windows.h>
+#include <vector>
 
 struct ShadersData {
     float shaderTime = 0.0f;
@@ -75,3 +77,4 @@ struct GUIData {
 
 extern ShadersData shadersData;
 extern GUIData guiData;
+extern std::vector<BYTE> lastPixels;

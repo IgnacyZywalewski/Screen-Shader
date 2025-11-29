@@ -2,6 +2,10 @@
 #include "helpers.h"
 #include "nlohmann/json.hpp"
 
+#include <ctime>
+#include "stb_image_write.h"
+#include <filesystem>
+
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
@@ -189,4 +193,27 @@ std::vector<std::string> GetSaveList() {
     }
 
     return out;
+}
+
+void SaveTextureScreenshot() {
+    if (lastPixels.empty()) return;
+
+    const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+    const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+    std::filesystem::create_directories("screenshots");
+
+    for (int y = 0; y < screenHeight / 2; ++y) {
+        for (int x = 0; x < screenWidth * 4; ++x) {
+            std::swap(lastPixels[y * screenWidth * 4 + x], lastPixels[(screenHeight - 1 - y) * screenWidth * 4 + x]);
+        }
+    }
+
+    char filename[128];
+    std::time_t t = std::time(nullptr);
+    std::tm tm{};
+    localtime_s(&tm, &t);
+    std::strftime(filename, sizeof(filename), "screenshots/screenshot_%Y-%m-%d_%H-%M-%S.png", &tm);
+
+    stbi_write_png(filename, screenWidth, screenHeight, 4, lastPixels.data(), screenWidth * 4);
 }
