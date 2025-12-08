@@ -53,6 +53,7 @@
     <ClCompile Include="src\gui.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer.cpp" />
+    <None Include="shaders\sharpness_shader.frag" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\blur_shader.frag" />

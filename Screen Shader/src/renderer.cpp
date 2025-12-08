@@ -22,12 +22,14 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
 
     std::string vertexShader = LoadShaderFromFile("shaders/screen_shader.vert");
     std::string fragmentShader = LoadShaderFromFile("shaders/screen_shader.frag");
+    std::string sharpnessFragShader = LoadShaderFromFile("shaders/sharpness_shader.frag");
     std::string pixelateFragShader = LoadShaderFromFile("shaders/pixelate_shader.frag");
     std::string kuwaharaFragShader = LoadShaderFromFile("shaders/kuwahara_shader.frag");
     std::string dogFragShader = LoadShaderFromFile("shaders/dog_shader.frag");
     std::string blurFragShader = LoadShaderFromFile("shaders/blur_shader.frag");
 
     shaderProgram = CreateShaderProgram(vertexShader.c_str(), fragmentShader.c_str());
+    sharpnessShaderProgram = CreateShaderProgram(vertexShader.c_str(), sharpnessFragShader.c_str());
     pixelateShaderProgram = CreateShaderProgram(vertexShader.c_str(), pixelateFragShader.c_str());
     kuwaharaShaderProgram = CreateShaderProgram(vertexShader.c_str(), kuwaharaFragShader.c_str());
     dogShaderProgram = CreateShaderProgram(vertexShader.c_str(), dogFragShader.c_str());
@@ -86,16 +88,19 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
                 MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
         };
 
+        //sharpness
+        CreateFBO(sharpnessTexture, sharpnessFbo);
+
         //pixelate
         CreateFBO(pixelateTexture, pixelateFbo);
 
-        // kuwhara
+        //kuwhara
         CreateFBO(kuwaharaTexture, kuwaharaFbo);
 
-        // dog
+        //dog
         CreateFBO(dogTexture, dogFbo);
 
-        // blur
+        //blur
         CreateFBO(blurTexture, blurFbo);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -134,7 +139,7 @@ void Renderer::RenderOverlay() {
         return;
 
     //pass 1 - jasnosc, kontrast, kolory itp...
-    glBindFramebuffer(GL_FRAMEBUFFER, pixelateFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, sharpnessFbo);
     glViewport(0, 0, screenWidth, screenHeight);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -167,8 +172,6 @@ void Renderer::RenderOverlay() {
     
     glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
     glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
-
-    glUniform1i(glGetUniformLocation(shaderProgram, "sharpness"), shadersData.sharpness);
     
     glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
     glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
@@ -178,7 +181,29 @@ void Renderer::RenderOverlay() {
     glBindVertexArray(0);
 
 
-    //pass 2 - pixelate
+    //pass 2 - sharpness
+    glBindFramebuffer(GL_FRAMEBUFFER, pixelateFbo);
+    glViewport(0, 0, screenWidth, screenHeight);
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(sharpnessShaderProgram);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, sharpnessTexture);
+
+    glUniform1i(glGetUniformLocation(sharpnessShaderProgram, "screenTex"), 0);
+    glUniform2f(glGetUniformLocation(sharpnessShaderProgram, "pixelSize"), 1.0f / screenWidth, 1.0f / screenHeight);
+
+    glUniform1i(glGetUniformLocation(sharpnessShaderProgram, "sharpness"), shadersData.sharpness);
+
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+
+
+    //pass 3 - pixelate
     glBindFramebuffer(GL_FRAMEBUFFER, kuwaharaFbo);
     glViewport(0, 0, screenWidth, screenHeight);
     glClearColor(0, 0, 0, 0);
@@ -201,7 +226,7 @@ void Renderer::RenderOverlay() {
     glBindVertexArray(0);
 
 
-    //pass 3 - kuwahara
+    //pass 4 - kuwahara
     glBindFramebuffer(GL_FRAMEBUFFER, dogFbo);
     glViewport(0, 0, screenWidth, screenHeight);
     glClearColor(0, 0, 0, 0);
@@ -223,7 +248,7 @@ void Renderer::RenderOverlay() {
     glBindVertexArray(0);
 
 
-    //pass 4 - dog
+    //pass 5 - dog
     glBindFramebuffer(GL_FRAMEBUFFER, blurFbo);
     glViewport(0, 0, screenWidth, screenHeight);
     glClearColor(0, 0, 0, 0);
@@ -250,7 +275,7 @@ void Renderer::RenderOverlay() {
     glBindVertexArray(0);
 
 
-    //pass 5 - blur
+    //pass 6 - blur
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, screenWidth, screenHeight);
     glClearColor(0, 0, 0, 0);
@@ -328,7 +353,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
     BITMAPINFO bmi = {};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biHeight = height;
     bmi.bmiHeader.biPlanes = 1;
     bmi.bmiHeader.biBitCount = 24;
     bmi.bmiHeader.biCompression = BI_RGB;
