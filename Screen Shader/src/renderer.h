@@ -43,7 +43,7 @@ private:
     
     GLuint VAO = 0, VBO = 0, EBO = 0;
 
-    std::vector<BYTE> screenPacked;
+    std::vector<unsigned char> screenPacked;
 
     int screenWidth = 0;
     int screenHeight = 0;

@@ -26,6 +26,8 @@ uniform bool vignette;
 uniform float vigRadius;
 uniform float vigSmoothness;
 
+uniform bool sharpness;
+
 
 void forceKeepUniforms() {
     float dummy = brightness + gamma + contrast + saturation + red + green + blue;
@@ -106,8 +108,9 @@ void applyVignetteFilter(out vec3 color) {
     color *= vignetteValue;
 }
 
+
 void applyFilmGrain(out vec3 color) {
-    vec3 p = fract(vec3(TexCoord * 800.0, time * 60.0) * 0.1031);
+    vec3 p = fract(vec3(TexCoord * 800.0, time / 600.0) * 0.1031);
     p += dot(p, p.yzx + 33.33);
 
     float noise = fract((p.x + p.y) * p.z) - 0.5;
@@ -116,6 +119,27 @@ void applyFilmGrain(out vec3 color) {
     float fade = 1.0 - luminance;
 
     color += noise * grainAmount * fade;
+}
+
+
+void changeSharpness(inout vec3 color) {
+    vec3 sum = vec3(0.0);
+
+    for(int x = -1; x <= 1; x++) {
+        vec2 offset = vec2(x, 0.0) * pixelSize;
+        if(x == 0)
+            sum += 5 * texture(screenTex, TexCoord + offset).rgb; 
+        else
+            sum += (-1) * texture(screenTex, TexCoord + offset).rgb; 
+    }
+
+    for(int y = -1; y <= 1; y++) {
+        vec2 offset = vec2(0.0, y) * pixelSize;
+        if(y != 0)
+            sum += (-1) * texture(screenTex, TexCoord + offset).rgb; 
+    }
+
+    color = clamp(sum, 0.0, 1.0);
 }
 
 
@@ -143,6 +167,9 @@ void main() {
 
     if(filmGrain)
         applyFilmGrain(color);
+
+    if(sharpness)
+        changeSharpness(color);
 
     FragColor = vec4(color, 1.0);
 }

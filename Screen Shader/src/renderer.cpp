@@ -161,14 +161,16 @@ void Renderer::RenderOverlay() {
     glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
     glUniform1i(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);
 
-    glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
-    glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
-        
     glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
     glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
     glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
+    
+    glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
+    glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
 
-    glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "sharpness"), shadersData.sharpness);
+    
+    glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
     glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
     glBindVertexArray(VAO);

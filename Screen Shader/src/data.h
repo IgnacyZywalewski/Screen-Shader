@@ -1,7 +1,7 @@
 #pragma once
 #include "imgui/imgui.h"
-#include <windows.h>
 #include <vector>
+#include <string>
 
 struct ShadersData {
     float shaderTime = 0.0f;
@@ -37,7 +37,7 @@ struct ShadersData {
 
     bool dog = false;
     float sigma = 1.4f;
-    float scale = 1.5f;
+    float scale = 1.6f;
     float threshold = 0.5f;
     float tau = 10.0f;
     ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -46,9 +46,12 @@ struct ShadersData {
     bool blur = false;
     int blurRadius = 5;
 
+    bool sharpness = false;
 };
 
 struct GUIData {
+    std::string currentSave;
+
     float windowHeight = 550.0f;
     float windowWidth = 350.0f;
 
@@ -77,4 +80,4 @@ struct GUIData {
 
 extern ShadersData shadersData;
 extern GUIData guiData;
-extern std::vector<BYTE> lastPixels;
+extern std::vector<unsigned char> lastPixels;

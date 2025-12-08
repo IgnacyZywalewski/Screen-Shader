@@ -13,8 +13,7 @@ vec3 gaussian1D(bool horizontal) {
     float sum = 0.0;
     float sigma = float(blurRadius) / 3.0f;
 
-    for (int i = -blurRadius; i <= blurRadius; i++) {
-        float x = float(i);
+    for (int x = -blurRadius; x <= blurRadius; x++) {
         float weight = exp(-(x*x)/(2.0*sigma*sigma));
 
         vec2 offset = horizontal ? vec2(x * pixelSize.x, 0.0) : vec2(0.0, x * pixelSize.y);

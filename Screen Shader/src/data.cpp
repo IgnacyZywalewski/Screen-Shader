@@ -2,4 +2,4 @@
 
 ShadersData shadersData;
 GUIData guiData;
-std::vector<BYTE> lastPixels;
+std::vector<unsigned char> lastPixels;

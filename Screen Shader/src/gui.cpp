@@ -100,9 +100,17 @@ void GUI::Render(HWND hwnd) {
             guiData.nightMode = !guiData.nightMode;
         }
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(guiData.buttonSize, guiData.buttonSize))) ShowWindow(hwnd, SW_MINIMIZE);
+
+        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(guiData.buttonSize, guiData.buttonSize))) 
+            ShowWindow(hwnd, SW_MINIMIZE);
+
         ImGui::SameLine();
-        if (ImGui::Button(ICON_FA_XMARK, ImVec2(guiData.buttonSize, guiData.buttonSize))) PostQuitMessage(0);
+
+        if (ImGui::Button(ICON_FA_XMARK, ImVec2(guiData.buttonSize, guiData.buttonSize))) {
+            if(guiData.currentSave != "default")
+                SaveSettings(guiData.currentSave, shadersData, guiData);
+            PostQuitMessage(0);
+        }
 
         if (!guiData.collapsed) ImGui::Separator();
     }
@@ -254,7 +262,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
-            //grain
+            //film grain
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Film grain");
             ImGui::SameLine(guiData.labelWidth);
@@ -276,6 +284,12 @@ void GUI::Render(HWND hwnd) {
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
+
+            //wysostrzenie
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Sharpness");
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::Checkbox("##sharpness_checkbox", &shadersData.sharpness);
 
             //pikselizacja
             ImGui::AlignTextToFramePadding();
@@ -299,6 +313,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
+
 
             //kuwahara
             ImGui::AlignTextToFramePadding();
@@ -390,6 +405,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
+
             ImGui::NewLine();
             ImGui::NewLine();
         }
@@ -429,35 +445,34 @@ void GUI::Render(HWND hwnd) {
         float buttonWidth = ImGui::GetContentRegionAvail().x / 2;
 
         std::vector<std::string> saves = GetSaveList();
-        static std::string currentSave;
 
         if (guiData.firstFrame) {
             if (!saves.empty()) {
-                if (currentSave.empty()) {
-                    currentSave = saves[0];
-                    LoadSettings(currentSave);
+                if (guiData.currentSave.empty()) {
+                    guiData.currentSave = saves[0];
+                    LoadSettings(guiData.currentSave);
                 }
             }
             else {
-                currentSave = "default";
+                guiData.currentSave = "default";
             }
             guiData.firstFrame = false;
         }
 
-        std::string comboName = currentSave != "default" ? std::string("Settings: " + currentSave) : "Settings";
+        std::string comboName = guiData.currentSave != "default" ? std::string("Settings: " + guiData.currentSave) : "Settings";
 
         ImGui::PushItemWidth(buttonWidth + 10);
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, (guiData.buttonSize - ImGui::GetFontSize()) * 0.5f));
         if (ImGui::BeginCombo("##settings", comboName.c_str())) {
             for (auto& file : saves) {
-                bool isSelected = (file == currentSave);
+                bool isSelected = (file == guiData.currentSave);
 
                 if (ImGui::Selectable(file.c_str(), isSelected)) {
-                    if (currentSave != "default") 
-                        SaveSettings(currentSave, shadersData, guiData);
+                    if (guiData.currentSave != "default")
+                        SaveSettings(guiData.currentSave, shadersData, guiData);
 
-                    currentSave = file;
-                    LoadSettings(currentSave);
+                    guiData.currentSave = file;
+                    LoadSettings(guiData.currentSave);
                 }
                 if (isSelected)
                     ImGui::SetItemDefaultFocus();
@@ -466,8 +481,8 @@ void GUI::Render(HWND hwnd) {
             ImGui::Separator();
 
             if (ImGui::Selectable("+ Add new profile")) {
-                if (currentSave != "default")
-                    SaveSettings(currentSave, shadersData, guiData);
+                if (guiData.currentSave != "default")
+                    SaveSettings(guiData.currentSave, shadersData, guiData);
 
                 std::string newName = "Profile " + std::to_string(saves.size() + 1);
 
@@ -475,7 +490,7 @@ void GUI::Render(HWND hwnd) {
                 guiData = GUIData();
 
                 SaveSettings(newName, shadersData, guiData);
-                currentSave = newName;
+                guiData.currentSave = newName;
                 saves = GetSaveList();
             }
 
