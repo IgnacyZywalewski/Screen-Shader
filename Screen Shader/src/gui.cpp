@@ -249,10 +249,15 @@ void GUI::Render(HWND hwnd) {
                 ImGui::Indent(guiData.offset);
 
                 ImGui::AlignTextToFramePadding();
+                ImGui::Text("Hardness");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::Checkbox("##vignette_harndness_checkbox", &shadersData.vigHardness);
+
+                ImGui::AlignTextToFramePadding();
                 ImGui::Text("Radius");
                 ImGui::SameLine(guiData.labelWidth);
                 ImGui::PushItemWidth(guiData.sliderWidth);
-                ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.5f, "%.2f");
+                ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonSize, 0)))
@@ -441,9 +446,8 @@ void GUI::Render(HWND hwnd) {
 
         float centerY = (guiData.footerBarHeight - guiData.buttonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
         ImGui::SetCursorPosY(centerY);
-
         float buttonWidth = ImGui::GetContentRegionAvail().x / 2;
-
+        
         std::vector<std::string> saves = GetSaveList();
 
         if (guiData.firstFrame) {

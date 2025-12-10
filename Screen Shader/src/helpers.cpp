@@ -73,7 +73,7 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
 
     j["vignette"] = shader.vignette;
     j["vigRadius"] = shader.vigRadius;
-    j["vigSmoothness"] = shader.vigSmoothness;
+    j["vigHardness"] = shader.vigHardness;
 
     j["filmGrain"] = shader.filmGrain;
     j["grainAmount"] = shader.grainAmount;
@@ -133,7 +133,7 @@ bool LoadSettings(const std::string& name) {
 
     get(shadersData.vignette, "vignette");
     get(shadersData.vigRadius, "vigRadius");
-    get(shadersData.vigSmoothness, "vigSmoothness");
+    get(shadersData.vigHardness, "vigHardness");
 
     get(shadersData.filmGrain, "filmGrain");
     get(shadersData.grainAmount, "grainAmount");

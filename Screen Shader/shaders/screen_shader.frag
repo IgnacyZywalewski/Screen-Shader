@@ -24,7 +24,7 @@ uniform float grainAmount;
 
 uniform bool vignette;
 uniform float vigRadius;
-uniform float vigSmoothness;
+uniform bool vigHardness;
 
 
 void forceKeepUniforms() {
@@ -95,20 +95,24 @@ void applyEmbossFilter(out vec3 color) {
 
 void applyVignetteFilter(out vec3 color) {
     vec2 uv = TexCoord - vec2(0.5);
-    
+
     vec2 texSize = textureSize(screenTex, 0);
     float aspectRatio = texSize.x / texSize.y;
 
     uv.x *= aspectRatio;
+
     float dist = length(uv);
-    float vignetteValue = smoothstep(vigRadius, vigRadius - vigSmoothness, dist);
+    float softV = smoothstep(vigRadius, vigRadius - 1.0, dist);
+    float hardV = 1.0 - step(vigRadius, dist);
+
+    float vignetteValue = mix(softV, hardV, float(vigHardness));
 
     color *= vignetteValue;
 }
 
 
 void applyFilmGrain(out vec3 color) {
-    vec3 p = fract(vec3(TexCoord * 800.0, time / 600.0) * 0.1031);
+    vec3 p = fract(vec3(TexCoord * 800.0, time / 1000.0) * 0.1031);
     p += dot(p, p.yzx + 33.33);
 
     float noise = fract((p.x + p.y) * p.z) - 0.5;

@@ -59,52 +59,55 @@ bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
     glEnableVertexAttribArray(1);
     glBindVertexArray(0);
 
-    if (!screenPacked.empty()) {
 
-        glGenTextures(1, &screenTexture);
-        glBindTexture(GL_TEXTURE_2D, screenTexture);
+    if (screenPacked.empty())
+        return false;
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    auto CreateFBO = [&](GLuint& tex, GLuint& fbo) {
+        glGenTextures(1, &tex);
+        glBindTexture(GL_TEXTURE_2D, tex);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        auto CreateFBO = [&](GLuint& tex, GLuint& fbo) {
-            glGenTextures(1, &tex);
-            glBindTexture(GL_TEXTURE_2D, tex);
+        glGenFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
 
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, screenWidth, screenHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
+    };
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //sharpness
+    CreateFBO(sharpnessTexture, sharpnessFbo);
 
-            glGenFramebuffers(1, &fbo);
-            glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+    //pixelate
+    CreateFBO(pixelateTexture, pixelateFbo);
 
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-                MessageBoxA(nullptr, "FBO not complete!", "Error", MB_OK);
-        };
+    //kuwhara
+    CreateFBO(kuwaharaTexture, kuwaharaFbo);
 
-        //sharpness
-        CreateFBO(sharpnessTexture, sharpnessFbo);
+    //dog
+    CreateFBO(dogTexture, dogFbo);
 
-        //pixelate
-        CreateFBO(pixelateTexture, pixelateFbo);
+    //blur
+    CreateFBO(blurTexture, blurFbo);
 
-        //kuwhara
-        CreateFBO(kuwaharaTexture, kuwaharaFbo);
-
-        //dog
-        CreateFBO(dogTexture, dogFbo);
-
-        //blur
-        CreateFBO(blurTexture, blurFbo);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
 
     return true;
 }
@@ -168,12 +171,12 @@ void Renderer::RenderOverlay() {
 
     glUniform1i(glGetUniformLocation(shaderProgram, "vignette"), shadersData.vignette);
     glUniform1f(glGetUniformLocation(shaderProgram, "vigRadius"), shadersData.vigRadius);
-    glUniform1f(glGetUniformLocation(shaderProgram, "vigSmoothness"), shadersData.vigSmoothness);
+    glUniform1i(glGetUniformLocation(shaderProgram, "vigHardness"), shadersData.vigHardness);
     
     glUniform1i(glGetUniformLocation(shaderProgram, "filmGrain"), shadersData.filmGrain);
     glUniform1f(glGetUniformLocation(shaderProgram, "grainAmount"), shadersData.grainAmount);
     
-    glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
+    glUniform1i(glGetUniformLocation(shaderProgram, "horizontalSwap"), shadersData.horizontalSwap);
     glUniform1i(glGetUniformLocation(shaderProgram, "verticalSwap"), shadersData.verticalSwap);
 
     glBindVertexArray(VAO);

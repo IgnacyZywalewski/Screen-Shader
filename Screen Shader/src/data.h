@@ -21,7 +21,7 @@ struct ShadersData {
 
     bool vignette = false;
     float vigRadius = 1.0f;
-    float vigSmoothness = 1.0f;
+    bool vigHardness = false;
 
     bool filmGrain = false;
     float grainAmount = 0.5f;
