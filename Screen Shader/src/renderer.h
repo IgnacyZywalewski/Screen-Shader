@@ -4,9 +4,6 @@
 #include <glad/glad.h>
 #include "imgui/imgui.h"
 
-#include "data.h"
-#include "helpers.h"
-
 #include <vector>
 
 class Renderer {

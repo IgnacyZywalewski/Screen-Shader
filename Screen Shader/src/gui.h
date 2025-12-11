@@ -7,9 +7,6 @@
 #include "assets/icons_font_awesome_6.h"
 #include <glad/glad.h>
 
-#include "data.h"
-#include "helpers.h"
-
 class GUI{
 public:
     bool Init(HWND hwnd);

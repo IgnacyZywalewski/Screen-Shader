@@ -1,9 +1,24 @@
 ﻿#include "renderer.h"
+#include "data.h"
+#include "helpers.h"
 
 #include <cassert>
 #include <string>
 #include <vector>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
+std::string LoadShaderFromFile(const char* path) {
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    if (!file) {
+        MessageBoxA(nullptr, (std::string("Nie mozna otworzyc pliku shadera: ") + path).c_str(), "Blad", MB_OK);
+        return "";
+    }
+    std::ostringstream contents;
+    contents << file.rdbuf();
+    return contents.str();
+}
 
 bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
     screenWidth = width;

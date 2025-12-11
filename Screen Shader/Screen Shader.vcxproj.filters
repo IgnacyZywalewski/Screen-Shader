@@ -69,6 +69,12 @@
     <ClInclude Include="src\pc_specs.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\saves.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="library\include\stb_image_write.h">
+      <Filter>library</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -107,11 +113,11 @@
     <ClCompile Include="src\data.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\helpers.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\glad.c">
       <Filter>library</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helpers.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

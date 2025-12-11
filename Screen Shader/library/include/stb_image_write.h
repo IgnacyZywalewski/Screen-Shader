@@ -147,7 +147,7 @@ LICENSE
   See end of file for license information.
 
 */
-#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #ifndef INCLUDE_STB_IMAGE_WRITE_H
 #define INCLUDE_STB_IMAGE_WRITE_H
 

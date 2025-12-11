@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\icons_font_awesome_6.h" />
+    <ClInclude Include="library\include\stb_image_write.h" />
+    <ClInclude Include="src\saves.h" />
     <ClInclude Include="src\pc_specs.h" />
     <ClInclude Include="src\data.h" />
     <ClInclude Include="imgui\backends\imgui_impl_opengl3.h" />
@@ -37,7 +39,6 @@
     <ClInclude Include="src\renderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\helpers.cpp" />
     <ClCompile Include="src\data.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp" />
@@ -52,6 +53,7 @@
     <ClCompile Include="src\app.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\gui.cpp" />
+    <ClCompile Include="src\helpers.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer.cpp" />
     <None Include="shaders\sharpness_shader.frag" />

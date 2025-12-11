@@ -1,13 +1,17 @@
 ﻿#include "gui.h"
+
 #include "pc_specs.h"
+#include "data.h"
+#include "helpers.h"
+#include "saves.h"
 
 #include <string>
 #include <filesystem>
 
 
 bool GUI::Init(HWND hwnd) {
-    initCPU();
-
+    initThread();
+  
     if (!InitOpenGL(hwnd, HDCGUI, GLContextGUI))
         return false;
 
@@ -447,8 +451,10 @@ void GUI::Render(HWND hwnd) {
             guiData.firstFramePCS = false;
         }
         if (ImGui::CollapsingHeader("Computer Specifications")) {
-            ImGui::Text("CPU: %s", GetProcessorName().c_str());
-            ImGui::Text("CPU usage: %.1f%%", GetProcessorUsage());
+            ImGui::Text("CPU: %s", GetCPUName().c_str());
+            ImGui::Text("CPU usage: %.1f%%", GetCPUUsage());
+            ImGui::Text("RAM: %.2f GB", GetRAM());
+            ImGui::Text("RAM usage: %.2f GB - %.f%%", GetRAMUsage(), (GetRAMUsage() / GetRAM()) * 100);
 
             ImGui::NewLine();
         }
@@ -558,7 +564,7 @@ void GUI::Render(HWND hwnd) {
 }
 
 void GUI::Close() {
-    closeCPUThread();
+    closeThread();
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_Shutdown();
