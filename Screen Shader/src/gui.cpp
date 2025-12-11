@@ -1,10 +1,13 @@
 ﻿#include "gui.h"
+#include "pc_specs.h"
 
 #include <string>
 #include <filesystem>
 
 
 bool GUI::Init(HWND hwnd) {
+    initCPU();
+
     if (!InitOpenGL(hwnd, HDCGUI, GLContextGUI))
         return false;
 
@@ -261,7 +264,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonSize, 0)))
-                    shadersData.vigRadius = 1.0f;
+                    shadersData.vigRadius = 0.75f;
 
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
@@ -437,6 +440,19 @@ void GUI::Render(HWND hwnd) {
             ImGui::NewLine();
         }
 
+
+        //specyfikacje komputera
+        if (guiData.firstFramePCS) {
+            ImGui::SetNextItemOpen(true);
+            guiData.firstFramePCS = false;
+        }
+        if (ImGui::CollapsingHeader("Computer Specifications")) {
+            ImGui::Text("CPU: %s", GetProcessorName().c_str());
+            ImGui::Text("CPU usage: %.1f%%", GetProcessorUsage());
+
+            ImGui::NewLine();
+        }
+
         ImGui::EndChild();
 
 
@@ -542,6 +558,8 @@ void GUI::Render(HWND hwnd) {
 }
 
 void GUI::Close() {
+    closeCPUThread();
+
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplWin32_Shutdown();

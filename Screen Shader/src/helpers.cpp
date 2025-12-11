@@ -1,13 +1,13 @@
 #pragma once
 #include "helpers.h"
+
 #include "nlohmann/json.hpp"
+#include "stb_image_write.h"
 
 #include <ctime>
-#include "stb_image_write.h"
 #include <filesystem>
 
 using json = nlohmann::json;
-namespace fs = std::filesystem;
 
 
 std::string LoadShaderFromFile(const char* path) {
@@ -21,9 +21,9 @@ std::string LoadShaderFromFile(const char* path) {
     return contents.str();
 }
 
-
 bool InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
     outHDC = GetDC(hwnd);
+
     PIXELFORMATDESCRIPTOR pfd = {};
     pfd.nSize = sizeof(pfd);
     pfd.nVersion = 1;
@@ -52,9 +52,8 @@ bool InitOpenGL(HWND hwnd, HDC& outHDC, HGLRC& outContext) {
     return true;
 }
 
-
 bool SaveSettings(const std::string& name, const ShadersData& shader, const GUIData& gui) {
-    fs::create_directory("saves");
+    std::filesystem::create_directory("saves");
 
     json j;
 
@@ -105,7 +104,6 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
     f << j.dump(4);
     return true;
 }
-
 
 bool LoadSettings(const std::string& name) {
     std::ifstream f("saves/" + name + ".json");
@@ -173,20 +171,19 @@ bool LoadSettings(const std::string& name) {
     return true;
 }
 
-
 void DeleteSave(const std::string& saveName) {
     std::string folder = "saves";
     std::string filePath = folder + "/" + saveName + ".json";
 
-    if (fs::exists(filePath))
-        fs::remove(filePath);
+    if (std::filesystem::exists(filePath))
+        std::filesystem::remove(filePath);
 }
 
 std::vector<std::string> GetSaveList() {
     std::vector<std::string> out;
-    fs::create_directory("saves");
+    std::filesystem::create_directory("saves");
 
-    for (auto& p : fs::directory_iterator("saves"))
+    for (auto& p : std::filesystem::directory_iterator("saves"))
     {
         if (p.path().extension() == ".json")
             out.push_back(p.path().stem().string());
@@ -203,8 +200,8 @@ void SaveTextureScreenshot() {
 
     std::filesystem::create_directories("screenshots");
 
-    for (int y = 0; y < screenHeight / 2; ++y) {
-        for (int x = 0; x < screenWidth * 4; ++x) {
+    for (int y = 0; y < screenHeight / 2; y++) {
+        for (int x = 0; x < screenWidth * 4; x++) {
             std::swap(lastPixels[y * screenWidth * 4 + x], lastPixels[(screenHeight - 1 - y) * screenWidth * 4 + x]);
         }
     }

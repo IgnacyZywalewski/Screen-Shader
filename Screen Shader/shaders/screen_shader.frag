@@ -102,7 +102,7 @@ void applyVignetteFilter(out vec3 color) {
     uv.x *= aspectRatio;
 
     float dist = length(uv);
-    float softV = smoothstep(vigRadius, vigRadius - 1.0, dist);
+    float softV = smoothstep(vigRadius, vigRadius - 0.5, dist);
     float hardV = 1.0 - step(vigRadius, dist);
 
     float vignetteValue = mix(softV, hardV, float(vigHardness));

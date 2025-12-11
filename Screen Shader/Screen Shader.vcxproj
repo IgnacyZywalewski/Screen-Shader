@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\icons_font_awesome_6.h" />
+    <ClInclude Include="src\pc_specs.h" />
     <ClInclude Include="src\data.h" />
     <ClInclude Include="imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\backends\imgui_impl_opengl3_loader.h" />

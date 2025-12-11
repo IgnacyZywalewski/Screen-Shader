@@ -66,6 +66,9 @@
     <ClInclude Include="src\helpers.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\pc_specs.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">

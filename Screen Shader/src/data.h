@@ -20,7 +20,7 @@ struct ShadersData {
     bool emboss = false;
 
     bool vignette = false;
-    float vigRadius = 1.0f;
+    float vigRadius = 0.75f;
     bool vigHardness = false;
 
     bool filmGrain = false;
@@ -76,6 +76,7 @@ struct GUIData {
     bool firstFrameCC = true;
     bool firstFrameFIL = true;
     bool firstFrameFL = true;
+    bool firstFramePCS = true;
 };
 
 extern ShadersData shadersData;

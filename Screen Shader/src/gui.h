@@ -10,7 +10,6 @@
 #include "data.h"
 #include "helpers.h"
 
-
 class GUI{
 public:
     bool Init(HWND hwnd);
@@ -19,5 +18,5 @@ public:
 
 private:
     HGLRC GLContextGUI = nullptr;
-    HDC HDCGUI = nullptr;
+    HDC HDCGUI = nullptr;  
 };
