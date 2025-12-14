@@ -451,22 +451,35 @@ void GUI::Render(HWND hwnd) {
             guiData.firstFramePCS = false;
         }
         if (ImGui::CollapsingHeader("Computer Specifications")) {
+            ImGui::NewLine();
+
             ImGui::Text("CPU: %s", GetCPUName().c_str());
             ImGui::Text("CPU overall usage: %.2f%%", GetCPUUsage());
             ImGui::Text("CPU process usage: %.2f%%", GetCPUProcessUsage());
+            
+            ImGui::NewLine();
             ImGui::Separator();
+            ImGui::NewLine();
+
             ImGui::Text("RAM available: %.2f GB", GetRAM());
             ImGui::Text("RAM overall usage: %.2f GB - %.f%%", GetRAMUsage(), (GetRAMUsage() / GetRAM()) * 100);
             ImGui::Text("RAM process usage: %.2f MB", GetRAMProcessUsage());
+            
+            ImGui::NewLine();
             ImGui::Separator();
+            ImGui::NewLine();
+            
             ImGui::Text("Disk usage: %.2f%%", GetDiskUsage());
             ImGui::Text("Disk space total: %.2f GB", GetDiskTotalGB());
             ImGui::Text("Disk space available: %.2f GB", GetDiskTotalGB() - GetDiskUsedGB());
+            
+            ImGui::NewLine();
             ImGui::Separator();
-            ImGui::Text("GPU: ");
-            ImGui::Text("GPU usage: ");
-            ImGui::Text("GPU memory: ");
-            ImGui::Text("GPU Graphics API's: ");
+            ImGui::NewLine();
+            
+            ImGui::Text("GPU: %s", GetGPUName().c_str());
+            ImGui::Text("GPU memory: %.2f GB / %.2fGB", GetGPUUsedVRAM(), GetGPUTotalVRAM());
+            ImGui::Text("OpenGL version: %s", GetOpenGLVersion());
 
             ImGui::NewLine();
         }

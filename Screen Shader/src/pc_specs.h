@@ -3,10 +3,10 @@
 #include <string>
 #include <thread>
 #include <atomic>
-#include "TCHAR.h"
-#include "pdh.h"
 #include "psapi.h"
-#pragma comment(lib, "pdh.lib")
+
+#include "pdh.h"
+#include <dxgi1_4.h>
 
 #include <vector>
 
@@ -87,6 +87,120 @@ std::string GetCPUName() {
     }
 }
 
+double GetCPUUsage() { return g_CPUUsage.load(); }
+double GetCPUProcessUsage() { return g_CPUProcessUsage.load(); }
+
+
+double GetRAM() {
+    MEMORYSTATUSEX memInfo{ sizeof(memInfo) };
+    if (GlobalMemoryStatusEx(&memInfo)) return memInfo.ullTotalPhys / 1024.0 / 1024.0 / 1024.0;
+    return 0;
+}
+double GetRAMUsage() { return g_RAMUsage.load(); }
+double GetRAMProcessUsage() { return g_RAMProcessUsage.load(); }
+
+
+double GetDiskUsage() { return g_DiskUsage.load(); }
+double GetDiskTotalGB() { return g_DiskTotalGB.load(); }
+double GetDiskUsedGB() { return g_DiskUsedGB.load(); }
+
+
+std::string GetGPUName() {
+    IDXGIFactory* factory = nullptr;
+    IDXGIAdapter* adapter = nullptr;
+
+    if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory)))
+        return "Unknown GPU";
+
+    if (factory->EnumAdapters(0, &adapter) != S_OK) {
+        factory->Release();
+        return "Unknown GPU";
+    }
+
+    DXGI_ADAPTER_DESC desc;
+    adapter->GetDesc(&desc);
+
+    adapter->Release();
+    factory->Release();
+
+    std::wstring wname(desc.Description);
+    if (wname.empty()) 
+        return "Unknown GPU";
+
+    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), nullptr, 0, nullptr, nullptr);
+    std::string name(size_needed, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), &name[0], size_needed, nullptr, nullptr);
+
+    return name;
+}
+
+double GetGPUTotalVRAM() {
+    double totalGB = 0.0;
+    IDXGIFactory2* factory = nullptr;
+    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory2), (void**)&factory)))
+        return 0.0;
+
+    IDXGIAdapter1* adapter1 = nullptr;
+    if (factory->EnumAdapters1(0, &adapter1) != S_OK) {
+        factory->Release();
+        return 0.0;
+    }
+
+    IDXGIAdapter3* adapter3 = nullptr;
+    if (adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&adapter3) != S_OK) {
+        adapter1->Release();
+        factory->Release();
+        return 0.0;
+    }
+
+    DXGI_QUERY_VIDEO_MEMORY_INFO vramInfo;
+    if (SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &vramInfo))) {
+        totalGB = static_cast<double>(vramInfo.Budget) / 1024.0 / 1024.0 / 1024.0;
+    }
+
+    adapter3->Release();
+    adapter1->Release();
+    factory->Release();
+
+    return totalGB;
+}
+
+double GetGPUUsedVRAM() {
+    double usedGB = 0.0;
+    IDXGIFactory2* factory = nullptr;
+    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory2), (void**)&factory)))
+        return 0.0;
+
+    IDXGIAdapter1* adapter1 = nullptr;
+    if (factory->EnumAdapters1(0, &adapter1) != S_OK) {
+        factory->Release();
+        return 0.0;
+    }
+
+    IDXGIAdapter3* adapter3 = nullptr;
+    if (adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&adapter3) != S_OK) {
+        adapter1->Release();
+        factory->Release();
+        return 0.0;
+    }
+
+    DXGI_QUERY_VIDEO_MEMORY_INFO vramInfo;
+    if (SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &vramInfo))) {
+        usedGB = static_cast<double>(vramInfo.CurrentUsage) / 1024.0 / 1024.0 / 1024.0;
+    }
+
+    adapter3->Release();
+    adapter1->Release();
+    factory->Release();
+
+    return usedGB;
+}
+
+const char* GetOpenGLVersion() {
+    const char* version = (const char*)glGetString(GL_VERSION);
+    return version;
+}
+
 
 void MonitorThread() {
     PdhCollectQueryData(cpuQuery);
@@ -134,21 +248,6 @@ void MonitorThread() {
         Sleep(1000);
     }
 }
-
-double GetCPUUsage() { return g_CPUUsage.load(); }
-double GetCPUProcessUsage() { return g_CPUProcessUsage.load(); }
-
-double GetRAM() {
-    MEMORYSTATUSEX memInfo{ sizeof(memInfo) };
-    if (GlobalMemoryStatusEx(&memInfo)) return memInfo.ullTotalPhys / 1024.0 / 1024.0 / 1024.0;
-    return 0;
-}
-double GetRAMUsage() { return g_RAMUsage.load(); }
-double GetRAMProcessUsage() { return g_RAMProcessUsage.load(); }
-
-double GetDiskUsage() { return g_DiskUsage.load(); }
-double GetDiskTotalGB() { return g_DiskTotalGB.load(); }
-double GetDiskUsedGB() { return g_DiskUsedGB.load(); }
 
 
 void initThread() {
