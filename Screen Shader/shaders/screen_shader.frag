@@ -15,6 +15,9 @@ uniform float red;
 uniform float green;
 uniform float blue;
 
+uniform bool readingMode;
+uniform int temperature;
+
 uniform bool colorInversion;
 uniform bool blackWhite;
 uniform bool emboss;
@@ -70,14 +73,48 @@ void changeSaturation(inout vec3 color) {
     color = hsv2rgb(hsv);
 }
 
-void applyColorInversion(inout vec3 color) {
-    color = 1.0 - color;
-}
-
 void changeRGB(inout vec3 color) {
     color.r = clamp(color.r * red, 0.0, 1.0);
     color.g = clamp(color.g * green, 0.0, 1.0);
     color.b = clamp(color.b * blue, 0.0, 1.0);
+}
+
+vec3 kelvinToRGB(float kelvin) {
+    kelvin = clamp(kelvin, 1000.0, 40000.0) / 100.0;
+
+    float r, g, b;
+
+    // Red
+    if (kelvin <= 66.0)
+        r = 1.0;
+    else
+        r = clamp(1.292936186062745 * pow(kelvin - 60.0, -0.1332047592), 0.0, 1.0);
+
+    // Green
+    if (kelvin <= 66.0)
+        g = clamp(0.3900815787690196 * log(kelvin) - 0.6318414437886275, 0.0, 1.0);
+    else
+        g = clamp(1.129890860895294 * pow(kelvin - 60.0, -0.0755148492), 0.0, 1.0);
+
+    // Blue
+    if (kelvin >= 66.0)
+        b = 1.0;
+    else if (kelvin <= 19.0)
+        b = 0.0;
+    else
+        b = clamp(0.543206789110196 * log(kelvin - 10.0) - 1.19625408914, 0.0, 1.0);
+
+    return vec3(r, g, b);
+}
+
+
+void applyReadingMode(inout vec3 color) {
+    vec3 tempRGB = kelvinToRGB(temperature);
+    color *= tempRGB;
+}
+
+void applyColorInversion(inout vec3 color) {
+    color = 1.0 - color;
 }
 
 void applyBlackWhiteFilter(inout vec3 color) {
@@ -133,6 +170,9 @@ void main() {
     changeContrast(color);
     changeSaturation(color);
     changeRGB(color);
+
+    if(readingMode)
+        applyReadingMode(color);
 
     if (colorInversion)
         applyColorInversion(color);

@@ -15,6 +15,9 @@ struct ShadersData {
     float green = 1.0f;
     float blue = 1.0f;
 
+    bool readingMode = false;
+    int temperature = 4000;
+
     bool colorInversion = false;
     bool blackWhite = false;
     bool emboss = false;

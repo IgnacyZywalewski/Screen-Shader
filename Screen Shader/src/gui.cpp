@@ -228,6 +228,29 @@ void GUI::Render(HWND hwnd) {
             guiData.firstFrameFIL = false;
         }
         if (ImGui::CollapsingHeader("Filters")) {
+            //tryb do czytania
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Reading mode");
+            ImGui::SameLine(guiData.labelWidth);
+            ImGui::Checkbox("##reading_mode_checkbox", &shadersData.readingMode);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Reading Mode Option")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Temperature");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(guiData.sliderWidth);
+                ImGui::SliderInt("##temperature_slider", &shadersData.temperature, 2000, 5000);
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_temperature", ImVec2(guiData.buttonSize, 0)))
+                    shadersData.temperature = 4000;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
             //inwersja kolorow
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Negative");
@@ -478,7 +501,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::NewLine();
             
             ImGui::Text("GPU: %s", GetGPUName().c_str());
-            ImGui::Text("GPU memory: %.2f GB / %.2fGB", GetGPUUsedVRAM(), GetGPUTotalVRAM());
+            ImGui::Text("GPU memory: %.2f GB / %.2f GB", GetGPUUsedVRAM(), GetGPUTotalVRAM());
             ImGui::Text("OpenGL version: %s", GetOpenGLVersion());
 
             ImGui::NewLine();

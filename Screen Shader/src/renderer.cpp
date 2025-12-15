@@ -180,6 +180,9 @@ void Renderer::RenderOverlay() {
     glUniform1f(glGetUniformLocation(shaderProgram, "green"), shadersData.green);
     glUniform1f(glGetUniformLocation(shaderProgram, "blue"), shadersData.blue);
         
+    glUniform1i(glGetUniformLocation(shaderProgram, "readingMode"), shadersData.readingMode);
+    glUniform1i(glGetUniformLocation(shaderProgram, "temperature"), shadersData.temperature);
+
     glUniform1i(glGetUniformLocation(shaderProgram, "colorInversion"), shadersData.colorInversion);
     glUniform1i(glGetUniformLocation(shaderProgram, "blackWhite"), shadersData.blackWhite);
     glUniform1i(glGetUniformLocation(shaderProgram, "emboss"), shadersData.emboss);

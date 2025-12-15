@@ -14,14 +14,17 @@ static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
 static PDH_HQUERY diskQuery;
 static PDH_HCOUNTER diskTotal;
+static IDXGIAdapter3* g_adapter3 = nullptr;
 
 std::atomic<double> g_CPUUsage(0.0);
+std::atomic<double> g_CPUProcessUsage(0.0);
 std::atomic<double> g_RAMUsage(0.0);
 std::atomic<double> g_RAMProcessUsage(0.0);
-std::atomic<double> g_CPUProcessUsage(0.0);
 std::atomic<double> g_DiskUsage(0.0);
 std::atomic<double> g_DiskTotalGB(0.0);
 std::atomic<double> g_DiskUsedGB(0.0);
+std::atomic<double> g_VRAMUsedGB(0.0);
+
 
 bool g_Running = true;
 static std::thread thread;
@@ -32,6 +35,7 @@ static HANDLE self;
 
 static ULONGLONG lastRead = 0;
 static ULONGLONG lastWrite = 0;
+
 
 void InitProcessCPU() {
     SYSTEM_INFO sysInfo;
@@ -48,7 +52,6 @@ void InitProcessCPU() {
     memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
     memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
 }
-
 double GetProcessCPUUsage() {
     FILETIME ftime, fsys, fuser;
     ULARGE_INTEGER now, sys, user;
@@ -71,7 +74,6 @@ double GetProcessCPUUsage() {
 
     return percent * 100.0;
 }
-
 std::string GetCPUName() {
     HKEY hKey;
     char buffer[256];
@@ -86,7 +88,6 @@ std::string GetCPUName() {
         return "Unknown CPU";
     }
 }
-
 double GetCPUUsage() { return g_CPUUsage.load(); }
 double GetCPUProcessUsage() { return g_CPUProcessUsage.load(); }
 
@@ -105,6 +106,24 @@ double GetDiskTotalGB() { return g_DiskTotalGB.load(); }
 double GetDiskUsedGB() { return g_DiskUsedGB.load(); }
 
 
+bool InitGPUVRAM() {
+    IDXGIFactory1* factory = nullptr;
+    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&factory)))
+        return false;
+
+    IDXGIAdapter1* adapter1 = nullptr;
+    if (FAILED(factory->EnumAdapters1(0, &adapter1))) {
+        factory->Release();
+        return false;
+    }
+
+    HRESULT hr = adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&g_adapter3);
+
+    adapter1->Release();
+    factory->Release();
+
+    return SUCCEEDED(hr);
+}
 std::string GetGPUName() {
     IDXGIFactory* factory = nullptr;
     IDXGIAdapter* adapter = nullptr;
@@ -133,69 +152,34 @@ std::string GetGPUName() {
 
     return name;
 }
-
 double GetGPUTotalVRAM() {
-    double totalGB = 0.0;
-    IDXGIFactory2* factory = nullptr;
-    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory2), (void**)&factory)))
+    if (!g_adapter3) 
         return 0.0;
 
-    IDXGIAdapter1* adapter1 = nullptr;
-    if (factory->EnumAdapters1(0, &adapter1) != S_OK) {
-        factory->Release();
-        return 0.0;
+    DXGI_QUERY_VIDEO_MEMORY_INFO info{};
+    if (SUCCEEDED(g_adapter3->QueryVideoMemoryInfo(
+        0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &info))) {
+
+        return info.Budget / 1024.0 / 1024.0 / 1024.0;
     }
-
-    IDXGIAdapter3* adapter3 = nullptr;
-    if (adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&adapter3) != S_OK) {
-        adapter1->Release();
-        factory->Release();
-        return 0.0;
-    }
-
-    DXGI_QUERY_VIDEO_MEMORY_INFO vramInfo;
-    if (SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &vramInfo))) {
-        totalGB = static_cast<double>(vramInfo.Budget) / 1024.0 / 1024.0 / 1024.0;
-    }
-
-    adapter3->Release();
-    adapter1->Release();
-    factory->Release();
-
-    return totalGB;
+    return 0.0;
 }
+void UpdateVRAMUsage() {
+    if (!g_adapter3)
+        return;
 
-double GetGPUUsedVRAM() {
-    double usedGB = 0.0;
-    IDXGIFactory2* factory = nullptr;
-    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory2), (void**)&factory)))
-        return 0.0;
+    DXGI_QUERY_VIDEO_MEMORY_INFO info{};
+    if (SUCCEEDED(g_adapter3->QueryVideoMemoryInfo(
+        0,
+        DXGI_MEMORY_SEGMENT_GROUP_LOCAL,
+        &info))) {
 
-    IDXGIAdapter1* adapter1 = nullptr;
-    if (factory->EnumAdapters1(0, &adapter1) != S_OK) {
-        factory->Release();
-        return 0.0;
+        g_VRAMUsedGB.store(
+            info.CurrentUsage / 1024.0 / 1024.0 / 1024.0
+        );
     }
-
-    IDXGIAdapter3* adapter3 = nullptr;
-    if (adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&adapter3) != S_OK) {
-        adapter1->Release();
-        factory->Release();
-        return 0.0;
-    }
-
-    DXGI_QUERY_VIDEO_MEMORY_INFO vramInfo;
-    if (SUCCEEDED(adapter3->QueryVideoMemoryInfo(0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &vramInfo))) {
-        usedGB = static_cast<double>(vramInfo.CurrentUsage) / 1024.0 / 1024.0 / 1024.0;
-    }
-
-    adapter3->Release();
-    adapter1->Release();
-    factory->Release();
-
-    return usedGB;
 }
-
+double GetGPUUsedVRAM() { return g_VRAMUsedGB.load(); }
 const char* GetOpenGLVersion() {
     const char* version = (const char*)glGetString(GL_VERSION);
     return version;
@@ -245,6 +229,9 @@ void MonitorThread() {
             }
         }
 
+        // VRAM
+        UpdateVRAMUsage();
+
         Sleep(1000);
     }
 }
@@ -266,6 +253,9 @@ void initThread() {
     PdhAddEnglishCounter(diskQuery, L"\\PhysicalDisk(_Total)\\% Disk Time", NULL, &diskTotal);
     PdhCollectQueryData(diskQuery);
 
+    // VRAM
+    InitGPUVRAM();
+
     thread = std::thread(MonitorThread);
 }
 
@@ -275,6 +265,14 @@ void closeThread() {
     if (thread.joinable()) 
         thread.join();
 
-    PdhCloseQuery(cpuQuery);
-    PdhCloseQuery(diskQuery);
+    if (cpuQuery) 
+        PdhCloseQuery(cpuQuery);
+    
+    if (diskQuery) 
+        PdhCloseQuery(diskQuery);
+
+    if (g_adapter3) {
+        g_adapter3->Release();
+        g_adapter3 = nullptr;
+    }
 }
