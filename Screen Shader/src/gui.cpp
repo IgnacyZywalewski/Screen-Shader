@@ -125,12 +125,98 @@ void GUI::Render(HWND hwnd) {
     if (!guiData.collapsed) {
         ImGui::BeginChild("ContentRegion", ImVec2(0, guiData.contentHeight), false);
 
-        //korekcja kolorow
-        if (guiData.firstFrameCC) {
+        //korekcja slepoty barw
+        if (guiData.firstFrameColorBlindness) {
             ImGui::SetNextItemOpen(true);
-            guiData.firstFrameCC = false;
+            guiData.firstFrameColorBlindness = false;
         }
-        if (ImGui::CollapsingHeader("Color corection")) {
+        if (ImGui::CollapsingHeader("Color blindess correction")) {
+
+            ImGui::Text("Protanopia - Red");
+            ImGui::SameLine(guiData.labelWidth + 60);
+            ImGui::Checkbox("##protanopia_checkbox", &shadersData.protanopia);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Option##protanopia")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::Text("Strength");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(guiData.sliderWidth);
+                ImGui::SliderFloat("##pronatopia_strength_slider", &shadersData.protanopiaStrength, 0.0f, 5.0f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pronatopia_strength", ImVec2(guiData.buttonSize, 0)))
+                    shadersData.protanopiaStrength = 2.0f;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
+            ImGui::Text("Deuteranopia - Green");
+            ImGui::SameLine(guiData.labelWidth + 60);
+            ImGui::Checkbox("##deuteranopia_checkbox", &shadersData.deuteranopia);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Option##deteranopia")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::Text("Strength");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(guiData.sliderWidth);
+                ImGui::SliderFloat("##deuteranopia_strength_slider", &shadersData.deuteranopiaStrength, 0.0f, 5.0f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_deuteranopia_strength", ImVec2(guiData.buttonSize, 0)))
+                    shadersData.deuteranopiaStrength = 2.0f;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
+            ImGui::Text("Tritanopia - Blue");
+            ImGui::SameLine(guiData.labelWidth + 60);
+            ImGui::Checkbox("##tritanopia_checkbox", &shadersData.tritanopia);
+            ImGui::SameLine();
+            if (ImGui::CollapsingHeader("Option##tritanopia")) {
+                ImGui::Indent(guiData.offset);
+
+                ImGui::Text("Strength");
+                ImGui::SameLine(guiData.labelWidth);
+                ImGui::PushItemWidth(guiData.sliderWidth);
+                ImGui::SliderFloat("##tritanopia_strength_slider", &shadersData.tritanopiaStrength, 0.0f, 3.0f, "%.2f");
+                ImGui::PopItemWidth();
+                ImGui::SameLine();
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tritanopia_strength", ImVec2(guiData.buttonSize, 0)))
+                    shadersData.tritanopiaStrength = 1.5f;
+
+                ImGui::Unindent(guiData.offset);
+                ImGui::NewLine();
+            }
+
+            ImGui::NewLine();
+            ImGui::NewLine();
+
+            ImGui::Text("Simulate Protanopia - Red");
+            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::Checkbox("##simulate_protanopia_checkbox", &shadersData.simulateProtanopia);
+
+            ImGui::Text("Simulate Deuteranopia - Green");
+            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::Checkbox("##simulate_deuteranopia_checkbox", &shadersData.simulateDeuteranopia);
+
+            ImGui::Text("Simulate Tritanopia - Blue");
+            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::Checkbox("##simulate_tritanopia_checkbox", &shadersData.simulateTritanopia);
+
+            ImGui::NewLine();
+        }
+
+
+        //korekcja kolorow
+        if (guiData.firstFrameColorCorection) {
+            ImGui::SetNextItemOpen(true);
+            guiData.firstFrameColorCorection = false;
+        }
+        if (ImGui::CollapsingHeader("Color correction")) {
             //jasnosc
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Brightness");
@@ -223,13 +309,13 @@ void GUI::Render(HWND hwnd) {
 
 
         //filtry
-        if (guiData.firstFrameFIL) {
+        if (guiData.firstFrameFilters) {
             ImGui::SetNextItemOpen(true);
-            guiData.firstFrameFIL = false;
+            guiData.firstFrameFilters = false;
         }
         if (ImGui::CollapsingHeader("Filters")) {
             //tryb do czytania
-            ImGui::AlignTextToFramePadding();
+            ImGui::AlignTextToFramePadding(); //???
             ImGui::Text("Reading mode");
             ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##reading_mode_checkbox", &shadersData.readingMode);
@@ -447,9 +533,9 @@ void GUI::Render(HWND hwnd) {
 
 
         //odwrocenia ekranu
-        if (guiData.firstFrameFL) {
+        if (guiData.firstFrameScreenFlips) {
             ImGui::SetNextItemOpen(true);
-            guiData.firstFrameFL = false;
+            guiData.firstFrameScreenFlips = false;
         }
         if (ImGui::CollapsingHeader("Screen Filps")) {
             //zamiana hotyzontalna
@@ -469,9 +555,9 @@ void GUI::Render(HWND hwnd) {
 
 
         //specyfikacje komputera
-        if (guiData.firstFramePCS) {
+        if (guiData.firstFramePCSpecs) {
             ImGui::SetNextItemOpen(true);
-            guiData.firstFramePCS = false;
+            guiData.firstFramePCSpecs = false;
         }
         if (ImGui::CollapsingHeader("Computer Specifications")) {
             ImGui::NewLine();

@@ -19,6 +19,18 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
 
     json j;
 
+    j["simulateProtanopia"] = shader.simulateProtanopia;
+    j["protanopia"] = shader.protanopia;
+    j["protanopiaStrength"] = shader.protanopiaStrength;
+
+    j["simulateDeuteranopia"] = shader.simulateDeuteranopia;
+    j["deuteranopia"] = shader.deuteranopia;
+    j["deuteranopiaStrength"] = shader.deuteranopiaStrength;
+    
+    j["simulateTritanopia"] = shader.simulateTritanopia;
+    j["tritanopia"] = shader.tritanopia;
+    j["tritanopiaStrength"] = shader.tritanopiaStrength;
+
     j["brightness"] = shader.brightness;
     j["gamma"] = shader.gamma;
     j["contrast"] = shader.contrast;
@@ -27,6 +39,9 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
     j["red"] = shader.red;
     j["green"] = shader.green;
     j["blue"] = shader.blue;
+
+    j["readingMode"] = shader.readingMode;
+    j["temperature"] = shader.temperature;
 
     j["colorInversion"] = shader.colorInversion;
     j["blackWhite"] = shader.blackWhite;
@@ -60,6 +75,8 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
     j["blur"] = shader.blur;
     j["blurRadius"] = shader.blurRadius;
 
+    j["sharpness"] = shader.sharpness;
+
     std::ofstream f("saves/" + name + ".json");
     if (!f) return false;
 
@@ -76,7 +93,19 @@ bool LoadSettings(const std::string& name) {
 
     auto get = [&](auto& var, const char* key) {
         if (j.contains(key)) var = j[key];
-        };
+    };
+
+    get(shadersData.simulateProtanopia, "simulateProtanopia");
+    get(shadersData.protanopia, "protanopia");
+    get(shadersData.protanopiaStrength, "protanopiaStrength");
+
+    get(shadersData.simulateDeuteranopia, "simulateDeuteranopia");
+    get(shadersData.deuteranopia, "deuteranopia");
+    get(shadersData.deuteranopiaStrength, "deuteranopiaStrength");
+    
+    get(shadersData.simulateTritanopia, "simulateTritanopia");
+    get(shadersData.tritanopia, "tritanopia");
+    get(shadersData.tritanopiaStrength, "tritanopiaStrength");
 
     get(shadersData.brightness, "brightness");
     get(shadersData.gamma, "gamma");
@@ -129,6 +158,8 @@ bool LoadSettings(const std::string& name) {
 
     get(shadersData.blur, "blur");
     get(shadersData.blurRadius, "blurRadius");
+
+    get(shadersData.sharpness, "sharpness");
 
     return true;
 }

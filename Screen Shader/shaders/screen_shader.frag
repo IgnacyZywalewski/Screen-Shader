@@ -107,7 +107,6 @@ vec3 kelvinToRGB(float kelvin) {
     return vec3(r, g, b);
 }
 
-
 void applyReadingMode(inout vec3 color) {
     vec3 tempRGB = kelvinToRGB(temperature);
     color *= tempRGB;
@@ -121,7 +120,7 @@ void applyBlackWhiteFilter(inout vec3 color) {
     color = vec3(dot(color.rgb, vec3(0.299, 0.587, 0.114)));
 }
 
-void applyEmbossFilter(out vec3 color) {
+void applyEmbossFilter(inout vec3 color) {
     color = vec3(0.5);
 
     color += texture(screenTex, TexCoord - pixelSize).rgb + 1.0;
@@ -130,7 +129,7 @@ void applyEmbossFilter(out vec3 color) {
     color = vec3((color.r + color.g + color.b) / 3.0);
 }
 
-void applyVignetteFilter(out vec3 color) {
+void applyVignetteFilter(inout vec3 color) {
     vec2 uv = TexCoord - vec2(0.5);
 
     vec2 texSize = textureSize(screenTex, 0);
@@ -147,8 +146,7 @@ void applyVignetteFilter(out vec3 color) {
     color *= vignetteValue;
 }
 
-
-void applyFilmGrain(out vec3 color) {
+void applyFilmGrain(inout vec3 color) {
     vec3 p = fract(vec3(TexCoord * 800.0, time / 1000.0) * 0.1031);
     p += dot(p, p.yzx + 33.33);
 

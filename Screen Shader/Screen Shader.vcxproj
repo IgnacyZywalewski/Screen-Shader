@@ -47,6 +47,7 @@
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <None Include="shaders\color_blindness_shader.frag" />
     <None Include="shaders\kuwahara_shader.frag">
       <FileType>Document</FileType>
     </None>

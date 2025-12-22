@@ -5,6 +5,18 @@
 
 struct ShadersData {
     float shaderTime = 0.0f;
+    
+    bool simulateProtanopia = false;
+    bool protanopia = false;
+    float protanopiaStrength = 2.0f;
+
+    bool simulateDeuteranopia = false;
+    bool deuteranopia = false;
+    float deuteranopiaStrength = 2.0f;
+
+    bool simulateTritanopia = false;
+    bool tritanopia = false;
+    float tritanopiaStrength = 1.5f;
 
     float brightness = 1.0f;
     float gamma = 1.0f;
@@ -76,10 +88,11 @@ struct GUIData {
     bool collapsed = false;
 
     bool firstFrame = true;
-    bool firstFrameCC = true;
-    bool firstFrameFIL = true;
-    bool firstFrameFL = true;
-    bool firstFramePCS = true;
+    bool firstFrameColorBlindness = true;
+    bool firstFrameColorCorection = true;
+    bool firstFrameFilters = true;
+    bool firstFrameScreenFlips = true;
+    bool firstFramePCSpecs = true;
 };
 
 extern ShadersData shadersData;
