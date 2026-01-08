@@ -106,24 +106,6 @@ double GetDiskTotalGB() { return g_DiskTotalGB.load(); }
 double GetDiskUsedGB() { return g_DiskUsedGB.load(); }
 
 
-bool InitGPUVRAM() {
-    IDXGIFactory1* factory = nullptr;
-    if (FAILED(CreateDXGIFactory1(__uuidof(IDXGIFactory1), (void**)&factory)))
-        return false;
-
-    IDXGIAdapter1* adapter1 = nullptr;
-    if (FAILED(factory->EnumAdapters1(0, &adapter1))) {
-        factory->Release();
-        return false;
-    }
-
-    HRESULT hr = adapter1->QueryInterface(__uuidof(IDXGIAdapter3), (void**)&g_adapter3);
-
-    adapter1->Release();
-    factory->Release();
-
-    return SUCCEEDED(hr);
-}
 std::string GetGPUName() {
     IDXGIFactory* factory = nullptr;
     IDXGIAdapter* adapter = nullptr;
@@ -152,34 +134,6 @@ std::string GetGPUName() {
 
     return name;
 }
-double GetGPUTotalVRAM() {
-    if (!g_adapter3) 
-        return 0.0;
-
-    DXGI_QUERY_VIDEO_MEMORY_INFO info{};
-    if (SUCCEEDED(g_adapter3->QueryVideoMemoryInfo(
-        0, DXGI_MEMORY_SEGMENT_GROUP_LOCAL, &info))) {
-
-        return info.Budget / 1024.0 / 1024.0 / 1024.0;
-    }
-    return 0.0;
-}
-void UpdateVRAMUsage() {
-    if (!g_adapter3)
-        return;
-
-    DXGI_QUERY_VIDEO_MEMORY_INFO info{};
-    if (SUCCEEDED(g_adapter3->QueryVideoMemoryInfo(
-        0,
-        DXGI_MEMORY_SEGMENT_GROUP_LOCAL,
-        &info))) {
-
-        g_VRAMUsedGB.store(
-            info.CurrentUsage / 1024.0 / 1024.0 / 1024.0
-        );
-    }
-}
-double GetGPUUsedVRAM() { return g_VRAMUsedGB.load(); }
 const char* GetOpenGLVersion() {
     const char* version = (const char*)glGetString(GL_VERSION);
     return version;
@@ -229,9 +183,6 @@ void MonitorThread() {
             }
         }
 
-        // VRAM
-        UpdateVRAMUsage();
-
         Sleep(1000);
     }
 }
@@ -252,9 +203,6 @@ void initThread() {
     PdhOpenQuery(NULL, NULL, &diskQuery);
     PdhAddEnglishCounter(diskQuery, L"\\PhysicalDisk(_Total)\\% Disk Time", NULL, &diskTotal);
     PdhCollectQueryData(diskQuery);
-
-    // VRAM
-    InitGPUVRAM();
 
     thread = std::thread(MonitorThread);
 }

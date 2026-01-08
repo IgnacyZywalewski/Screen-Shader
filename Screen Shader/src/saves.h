@@ -69,8 +69,8 @@ bool SaveSettings(const std::string& name, const ShadersData& shader, const GUID
     j["threshold"] = shader.threshold;
     j["tau"] = shader.tau;
 
-    j["dogColor1"] = { shader.dogColor1.x, shader.dogColor1.y, shader.dogColor1.z, shader.dogColor1.w };
-    j["dogColor2"] = { shader.dogColor2.x, shader.dogColor2.y, shader.dogColor2.z, shader.dogColor2.w };
+    //j["dogColor1"] = { shader.dogColor1.x, shader.dogColor1.y, shader.dogColor1.z, shader.dogColor1.w };
+    //j["dogColor2"] = { shader.dogColor2.x, shader.dogColor2.y, shader.dogColor2.z, shader.dogColor2.w };
 
     j["blur"] = shader.blur;
     j["blurRadius"] = shader.blurRadius;
@@ -142,7 +142,7 @@ bool LoadSettings(const std::string& name) {
     get(shadersData.threshold, "threshold");
     get(shadersData.tau, "tau");
 
-    if (j.contains("dogColor1")) {
+    /*if (j.contains("dogColor1")) {
         shadersData.dogColor1.x = j["dogColor1"][0];
         shadersData.dogColor1.y = j["dogColor1"][1];
         shadersData.dogColor1.z = j["dogColor1"][2];
@@ -154,7 +154,7 @@ bool LoadSettings(const std::string& name) {
         shadersData.dogColor2.y = j["dogColor2"][1];
         shadersData.dogColor2.z = j["dogColor2"][2];
         shadersData.dogColor2.w = j["dogColor2"][3];
-    }
+    }*/
 
     get(shadersData.blur, "blur");
     get(shadersData.blurRadius, "blurRadius");

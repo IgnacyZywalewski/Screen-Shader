@@ -55,8 +55,8 @@ struct ShadersData {
     float scale = 1.6f;
     float threshold = 0.5f;
     float tau = 10.0f;
-    ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-    ImVec4 dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+    //ImVec4 dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+    //ImVec4 dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
     bool blur = false;
     int blurRadius = 5;

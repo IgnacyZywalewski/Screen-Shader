@@ -435,7 +435,6 @@ void GUI::Render(HWND hwnd) {
                 ImGui::NewLine();
             }
 
-
             //kuwahara
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Kuwahara");
@@ -508,24 +507,22 @@ void GUI::Render(HWND hwnd) {
                 if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.buttonSize, 0)))
                     shadersData.tau = 10.0f;
 
-                ImGui::Text("Color A");
-                ImGui::SameLine(guiData.labelWidth - 26.0f);
-                ImGui::ColorEdit3("##dog_color1", (float*)&shadersData.dogColor1);
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.buttonSize, 0)))
-                    shadersData.dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                //ImGui::Text("Color A");
+                //ImGui::SameLine(guiData.labelWidth - 26.0f);
+                //ImGui::ColorEdit3("##dog_color1", (float*)&shadersData.dogColor1);
+                //ImGui::SameLine();
+                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.buttonSize, 0)))
+                //    shadersData.dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-                ImGui::Text("Color B");
-                ImGui::SameLine(guiData.labelWidth - 26.0f);
-                ImGui::ColorEdit3("##dog_color2", (float*)&shadersData.dogColor2);
-                ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonSize, 0)))
-                    shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+                //ImGui::Text("Color B");
+                //ImGui::SameLine(guiData.labelWidth - 26.0f);
+                //ImGui::ColorEdit3("##dog_color2", (float*)&shadersData.dogColor2);
+                //ImGui::SameLine();
+                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonSize, 0)))
+                //    shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
                 ImGui::Unindent(guiData.offset);
-                ImGui::NewLine();
             }
-
 
             ImGui::NewLine();
             ImGui::NewLine();
@@ -587,7 +584,6 @@ void GUI::Render(HWND hwnd) {
             ImGui::NewLine();
             
             ImGui::Text("GPU: %s", GetGPUName().c_str());
-            ImGui::Text("GPU memory: %.2f GB / %.2f GB", GetGPUUsedVRAM(), GetGPUTotalVRAM());
             ImGui::Text("OpenGL version: %s", GetOpenGLVersion());
 
             ImGui::NewLine();

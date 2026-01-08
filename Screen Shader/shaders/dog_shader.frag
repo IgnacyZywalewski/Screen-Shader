@@ -10,8 +10,8 @@ uniform float sigma;
 uniform float scale;   
 uniform float threshold;
 uniform float tau;
-uniform vec4 dogColor1;
-uniform vec4 dogColor2;
+//uniform vec4 dogColor1;
+//uniform vec4 dogColor2;
 
 vec3 gaussian1D(float sigma, bool horizontal) {
     int radius = int(ceil(sigma * 3.0f));
@@ -49,7 +49,8 @@ void main(){
 
         //1.0 + tanh(1.0f * (intensity - threshold));
         float edge = intensity > threshold ? 1.0 : 0.0;
-        FragColor = mix(dogColor2, dogColor1, edge);
+        //FragColor = mix(dogColor2, dogColor1, edge);
+        FragColor = vec4(vec3(edge), 1.0);
     } 
     else {
         FragColor = texture(screenTex, TexCoord);

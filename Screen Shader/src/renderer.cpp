@@ -320,8 +320,8 @@ void Renderer::RenderOverlay() {
     glUniform1f(glGetUniformLocation(dogShaderProgram, "scale"), shadersData.scale);
     glUniform1f(glGetUniformLocation(dogShaderProgram, "threshold"), shadersData.threshold);
     glUniform1f(glGetUniformLocation(dogShaderProgram, "tau"), shadersData.tau);
-    glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
-    glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
+    //glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor1"), 1, (float*)&shadersData.dogColor1);
+    //glUniform4fv(glGetUniformLocation(dogShaderProgram, "dogColor2"), 1, (float*)&shadersData.dogColor2);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
