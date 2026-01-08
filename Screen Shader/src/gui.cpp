@@ -655,11 +655,10 @@ void GUI::Render(HWND hwnd) {
                 guiData.firstFrame = false;
             }
 
-            std::string comboName = guiData.currentSave != "default" ? std::string("Save: " + guiData.currentSave) : "Saves";
+            std::string comboName = guiData.currentSave == "default" ? std::string("Save: def") : std::string("Save: " + guiData.currentSave);
 
             ImGui::PushItemWidth(buttonWidth);
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,
-                ImVec2(8, (guiData.smallButtonSize - ImGui::GetFontSize()) * 0.5f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, (guiData.smallButtonSize - ImGui::GetFontSize()) * 0.5f));
 
             if (ImGui::BeginCombo("##saves", comboName.c_str())) {
                 for (auto& file : saves) {
@@ -675,15 +674,15 @@ void GUI::Render(HWND hwnd) {
                         ImGui::SetItemDefaultFocus();
                 }
 
-                ImGui::Separator();
+                if(!saves.empty())
+                    ImGui::Separator();
 
-                if (ImGui::Selectable("+ Add new profile")) {
+                if (ImGui::Selectable("Add new save + ")) {
                     if (guiData.currentSave != "default")
                         SaveSettings(guiData.currentSave, shadersData, guiData);
 
-                    std::string newName = "Profile " + std::to_string(saves.size() + 1);
+                    std::string newName = std::to_string(saves.size() + 1);
                     shadersData = ShadersData();
-                    guiData = GUIData();
 
                     SaveSettings(newName, shadersData, guiData);
                     guiData.currentSave = newName;
@@ -699,11 +698,17 @@ void GUI::Render(HWND hwnd) {
             ImGui::SameLine();
 
             if (ImGui::Button("Delete save", ImVec2(buttonWidth, guiData.smallButtonSize))) {
+                if (guiData.currentSave != "default") {
+                    DeleteSave(guiData.currentSave);
+                    guiData.currentSave = "default";
+                    saves = GetSaveList();
+                    shadersData = ShadersData();
+                }
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth, guiData.smallButtonSize))){
+            if (ImGui::Button("Print Screen", ImVec2(buttonWidth, guiData.smallButtonSize))){
                 SaveTextureScreenshot();
             }
 
