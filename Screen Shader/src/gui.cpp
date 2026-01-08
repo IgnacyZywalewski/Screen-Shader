@@ -4,6 +4,7 @@
 #include "data.h"
 #include "helpers.h"
 #include "saves.h"
+#include "screen_flips.h"
 
 #include <string>
 #include <filesystem>
@@ -78,7 +79,7 @@ void GUI::Render(HWND hwnd) {
         }
 
         //collapse
-        if (ImGui::Button(guiData.collapsed ? ICON_FA_CHEVRON_UP : ICON_FA_CHEVRON_DOWN, ImVec2(guiData.buttonSize, guiData.buttonSize))) {
+        if (ImGui::Button(guiData.collapsed ? ICON_FA_CHEVRON_UP : ICON_FA_CHEVRON_DOWN, ImVec2(guiData.smallButtonSize, guiData.smallButtonSize))) {
             if (guiData.collapsed) {
                 ImGui::SetWindowSize(ImVec2(ImGui::GetWindowSize().x, guiData.lastHeight));
                 flags &= ~ImGuiWindowFlags_NoScrollWithMouse;
@@ -98,24 +99,25 @@ void GUI::Render(HWND hwnd) {
         ImGui::SameLine();
 
         ImGui::Text("Screen Shader");
-        ImGui::SameLine(ImGui::GetWindowWidth() - (3 * guiData.buttonSize) - 24);
+        ImGui::SameLine(ImGui::GetWindowWidth() - (3 * guiData.smallButtonSize) - 24);
 
         //przyciski
-        if (ImGui::Button(guiData.nightMode ? ICON_FA_MOON : ICON_FA_SUN, ImVec2(guiData.buttonSize, guiData.buttonSize))) {
+        if (ImGui::Button(guiData.nightMode ? ICON_FA_MOON : ICON_FA_SUN, ImVec2(guiData.smallButtonSize, guiData.smallButtonSize))) {
             if (guiData.nightMode) ImGui::StyleColorsLight();
             else ImGui::StyleColorsDark();
             guiData.nightMode = !guiData.nightMode;
         }
         ImGui::SameLine();
 
-        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(guiData.buttonSize, guiData.buttonSize))) 
+        if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(guiData.smallButtonSize, guiData.smallButtonSize))) 
             ShowWindow(hwnd, SW_MINIMIZE);
 
         ImGui::SameLine();
 
-        if (ImGui::Button(ICON_FA_XMARK, ImVec2(guiData.buttonSize, guiData.buttonSize))) {
+        if (ImGui::Button(ICON_FA_XMARK, ImVec2(guiData.smallButtonSize, guiData.smallButtonSize))) {
             if(guiData.currentSave != "default")
                 SaveSettings(guiData.currentSave, shadersData, guiData);
+            setOrientation(DMDO_DEFAULT);
             PostQuitMessage(0);
         }
 
@@ -132,6 +134,7 @@ void GUI::Render(HWND hwnd) {
         }
         if (ImGui::CollapsingHeader("Color blindess correction")) {
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Protanopia - Red");
             ImGui::SameLine(guiData.labelWidth + 60);
             ImGui::Checkbox("##protanopia_checkbox", &shadersData.protanopia);
@@ -145,13 +148,14 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##pronatopia_strength_slider", &shadersData.protanopiaStrength, 0.0f, 5.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pronatopia_strength", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pronatopia_strength", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.protanopiaStrength = 2.0f;
 
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Deuteranopia - Green");
             ImGui::SameLine(guiData.labelWidth + 60);
             ImGui::Checkbox("##deuteranopia_checkbox", &shadersData.deuteranopia);
@@ -165,13 +169,14 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##deuteranopia_strength_slider", &shadersData.deuteranopiaStrength, 0.0f, 5.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_deuteranopia_strength", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_deuteranopia_strength", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.deuteranopiaStrength = 2.0f;
 
                 ImGui::Unindent(guiData.offset);
                 ImGui::NewLine();
             }
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Tritanopia - Blue");
             ImGui::SameLine(guiData.labelWidth + 60);
             ImGui::Checkbox("##tritanopia_checkbox", &shadersData.tritanopia);
@@ -185,7 +190,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##tritanopia_strength_slider", &shadersData.tritanopiaStrength, 0.0f, 3.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tritanopia_strength", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tritanopia_strength", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.tritanopiaStrength = 1.5f;
 
                 ImGui::Unindent(guiData.offset);
@@ -195,14 +200,17 @@ void GUI::Render(HWND hwnd) {
             ImGui::NewLine();
             ImGui::NewLine();
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Protanopia - Red");
             ImGui::SameLine(guiData.labelWidth + 130);
             ImGui::Checkbox("##simulate_protanopia_checkbox", &shadersData.simulateProtanopia);
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Deuteranopia - Green");
             ImGui::SameLine(guiData.labelWidth + 130);
             ImGui::Checkbox("##simulate_deuteranopia_checkbox", &shadersData.simulateDeuteranopia);
 
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Tritanopia - Blue");
             ImGui::SameLine(guiData.labelWidth + 130);
             ImGui::Checkbox("##simulate_tritanopia_checkbox", &shadersData.simulateTritanopia);
@@ -210,6 +218,58 @@ void GUI::Render(HWND hwnd) {
             ImGui::NewLine();
         }
 
+
+        //odwrocenia ekranu
+        if (guiData.firstFrameScreenFlips) {
+            ImGui::SetNextItemOpen(true);
+            guiData.firstFrameScreenFlips = false;
+        }
+        if (ImGui::CollapsingHeader("Screen Filps")) {
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Rotate screen 90 right");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            if (ImGui::Button("Rotate##rotate_90_right_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+                rotate90right();
+            }
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Rotate screen 90 left");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            if (ImGui::Button("Rotate##rotate_90_left_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+                rotate90left();
+            }
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Rotate screen 180");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            if (ImGui::Button("Rotate##rotate_180_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+                rotate180();
+            }
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Normal");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            if (ImGui::Button("Normal##normal_screen_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+                normalScreen();
+            }
+
+            ImGui::NewLine();
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Horizontal Swap (visual)");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Vertical Swap (visual)");
+            ImGui::SameLine(guiData.labelWidth + 80);
+            ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
+
+
+            ImGui::NewLine();
+        }
+        
 
         //korekcja kolorow
         if (guiData.firstFrameColorCorection) {
@@ -225,7 +285,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::SliderFloat("##brightness_slider", &shadersData.brightness, 0.5f, 4.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_brightness", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.brightness = 1.0f;
 
             // gamma
@@ -236,7 +296,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::SliderFloat("##gamma_slider", &shadersData.gamma, 0.5f, 4.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_gamma", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.gamma = 1.0f;
 
             // kontrast
@@ -247,7 +307,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::SliderFloat("##contrast_slider", &shadersData.contrast, -50.0f, 50.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_contrast", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.contrast = 0.0f;
 
             // nasycenie
@@ -258,7 +318,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::SliderFloat("##saturation_slider", &shadersData.saturation, 0.0f, 3.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_saturation", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_saturation", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.saturation = 1.0f;
             ImGui::NewLine();
 
@@ -266,45 +326,44 @@ void GUI::Render(HWND hwnd) {
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Red");
             ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(guiData.sliderWidth - guiData.buttonSize - 8.0f);
+            ImGui::PushItemWidth(guiData.sliderWidth - guiData.smallButtonSize - 8.0f);
             ImGui::SliderFloat("##red_slider", &shadersData.red, 0.0f, 2.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_XMARK "##zero_red", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_XMARK "##zero_red", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.red = 0.0f;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_red", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_red", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.red = 1.0f;
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Green");
             ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(guiData.sliderWidth - guiData.buttonSize - 8.0f);
+            ImGui::PushItemWidth(guiData.sliderWidth - guiData.smallButtonSize - 8.0f);
             ImGui::SliderFloat("##green_slider", &shadersData.green, 0.0f, 2.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_XMARK "##zero_green", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_XMARK "##zero_green", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.green = 0.0f;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_green", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_green", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.green = 1.0f;
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Blue");
             ImGui::SameLine(guiData.labelWidth);
-            ImGui::PushItemWidth(guiData.sliderWidth - guiData.buttonSize - 8.0f);
+            ImGui::PushItemWidth(guiData.sliderWidth - guiData.smallButtonSize - 8.0f);
             ImGui::SliderFloat("##blue_slider", &shadersData.blue, 0.0f, 2.0f, "%.2f");
             ImGui::PopItemWidth();
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_XMARK "##zero_blue", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_XMARK "##zero_blue", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.blue = 0.0f;
             ImGui::SameLine();
-            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_blue", ImVec2(guiData.buttonSize, 0)))
+            if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_blue", ImVec2(guiData.smallButtonSize, 0)))
                 shadersData.blue = 1.0f;
 
             ImGui::NewLine();
             ImGui::NewLine();
-
         }
 
 
@@ -315,7 +374,7 @@ void GUI::Render(HWND hwnd) {
         }
         if (ImGui::CollapsingHeader("Filters")) {
             //tryb do czytania
-            ImGui::AlignTextToFramePadding(); //???
+            ImGui::AlignTextToFramePadding();
             ImGui::Text("Reading mode");
             ImGui::SameLine(guiData.labelWidth);
             ImGui::Checkbox("##reading_mode_checkbox", &shadersData.readingMode);
@@ -330,7 +389,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderInt("##temperature_slider", &shadersData.temperature, 2000, 5000);
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_temperature", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_temperature", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.temperature = 4000;
 
                 ImGui::Unindent(guiData.offset);
@@ -376,7 +435,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##vignette_radius_slider", &shadersData.vigRadius, 0.3f, 1.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_radius", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.vigRadius = 0.75f;
 
                 ImGui::Unindent(guiData.offset);
@@ -399,7 +458,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##grain_amount_slider", &shadersData.grainAmount, 0.2f, 2.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_amount_size", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_amount_size", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.grainAmount = 0.5f;
 
                 ImGui::Unindent(guiData.offset);
@@ -428,7 +487,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderInt("##pixel_chunk_slider", &shadersData.chunk, 32, 512);
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pixel_chunk_radius", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_pixel_chunk_radius", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.chunk = 256;
 
                 ImGui::Unindent(guiData.offset);
@@ -451,7 +510,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderInt("##kuwahara_radius_slider", &shadersData.kuwaharaRadius, 2, 5);
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_kuwahara_radius", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_kuwahara_radius", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.kuwaharaRadius = 2;
 
 
@@ -474,7 +533,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderInt("##blur_radius_slider", &shadersData.blurRadius, 1, 10);
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##zero_blur", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.blurRadius = 5;
 
                 ImGui::Unindent(guiData.offset);
@@ -495,7 +554,7 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##dog_threshold_slider", &shadersData.threshold, 0.0f, 1.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_threshold", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_threshold", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.threshold = 0.5f;
 
                 ImGui::Text("Sharpness");
@@ -504,49 +563,27 @@ void GUI::Render(HWND hwnd) {
                 ImGui::SliderFloat("##dog_tau_slider", &shadersData.tau, 0.5f, 50.0f, "%.2f");
                 ImGui::PopItemWidth();
                 ImGui::SameLine();
-                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.buttonSize, 0)))
+                if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_tau", ImVec2(guiData.smallButtonSize, 0)))
                     shadersData.tau = 10.0f;
 
                 //ImGui::Text("Color A");
                 //ImGui::SameLine(guiData.labelWidth - 26.0f);
                 //ImGui::ColorEdit3("##dog_color1", (float*)&shadersData.dogColor1);
                 //ImGui::SameLine();
-                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.buttonSize, 0)))
+                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor1", ImVec2(guiData.smallButtonSize, 0)))
                 //    shadersData.dogColor1 = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
                 //ImGui::Text("Color B");
                 //ImGui::SameLine(guiData.labelWidth - 26.0f);
                 //ImGui::ColorEdit3("##dog_color2", (float*)&shadersData.dogColor2);
                 //ImGui::SameLine();
-                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.buttonSize, 0)))
+                //if (ImGui::Button(ICON_FA_ROTATE_RIGHT "##reset_dogColor2", ImVec2(guiData.smallButtonSize, 0)))
                 //    shadersData.dogColor2 = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
                 ImGui::Unindent(guiData.offset);
             }
 
             ImGui::NewLine();
-            ImGui::NewLine();
-        }
-
-
-        //odwrocenia ekranu
-        if (guiData.firstFrameScreenFlips) {
-            ImGui::SetNextItemOpen(true);
-            guiData.firstFrameScreenFlips = false;
-        }
-        if (ImGui::CollapsingHeader("Screen Filps")) {
-            //zamiana hotyzontalna
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Horizontal Swap");
-            ImGui::SameLine(guiData.labelWidth + 20);
-            ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
-
-            //zamiana wertykalna
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Vertical Swap");
-            ImGui::SameLine(guiData.labelWidth + 20);
-            ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
-
             ImGui::NewLine();
         }
 
@@ -593,75 +630,86 @@ void GUI::Render(HWND hwnd) {
 
 
         // footer
-        ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
-        ImGui::Separator();
+        {
+            ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
+            ImGui::Separator();
 
-        float centerY = (guiData.footerBarHeight - guiData.buttonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
-        ImGui::SetCursorPosY(centerY);
-        float buttonWidth = ImGui::GetContentRegionAvail().x / 2;
-        
-        std::vector<std::string> saves = GetSaveList();
+            float centerY = (guiData.footerBarHeight - guiData.smallButtonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
+            ImGui::SetCursorPosY(centerY);
 
-        if (guiData.firstFrame) {
-            if (!saves.empty()) {
-                if (guiData.currentSave.empty()) {
-                    guiData.currentSave = saves[0];
-                    LoadSettings(guiData.currentSave);
+            float availWidth = ImGui::GetContentRegionAvail().x;
+            float buttonWidth = (availWidth - ImGui::GetStyle().ItemSpacing.x * 2) / 3.0f;
+
+            std::vector<std::string> saves = GetSaveList();
+
+            if (guiData.firstFrame) {
+                if (!saves.empty()) {
+                    if (guiData.currentSave.empty()) {
+                        guiData.currentSave = saves[0];
+                        LoadSettings(guiData.currentSave);
+                    }
                 }
+                else {
+                    guiData.currentSave = "default";
+                }
+                guiData.firstFrame = false;
             }
-            else {
-                guiData.currentSave = "default";
-            }
-            guiData.firstFrame = false;
-        }
 
-        std::string comboName = guiData.currentSave != "default" ? std::string("Settings: " + guiData.currentSave) : "Settings";
+            std::string comboName = guiData.currentSave != "default" ? std::string("Save: " + guiData.currentSave) : "Saves";
 
-        ImGui::PushItemWidth(buttonWidth + 10);
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, (guiData.buttonSize - ImGui::GetFontSize()) * 0.5f));
-        if (ImGui::BeginCombo("##settings", comboName.c_str())) {
-            for (auto& file : saves) {
-                bool isSelected = (file == guiData.currentSave);
+            ImGui::PushItemWidth(buttonWidth);
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding,
+                ImVec2(8, (guiData.smallButtonSize - ImGui::GetFontSize()) * 0.5f));
 
-                if (ImGui::Selectable(file.c_str(), isSelected)) {
+            if (ImGui::BeginCombo("##saves", comboName.c_str())) {
+                for (auto& file : saves) {
+                    bool isSelected = (file == guiData.currentSave);
+                    if (ImGui::Selectable(file.c_str(), isSelected)) {
+                        if (guiData.currentSave != "default")
+                            SaveSettings(guiData.currentSave, shadersData, guiData);
+
+                        guiData.currentSave = file;
+                        LoadSettings(guiData.currentSave);
+                    }
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+
+                ImGui::Separator();
+
+                if (ImGui::Selectable("+ Add new profile")) {
                     if (guiData.currentSave != "default")
                         SaveSettings(guiData.currentSave, shadersData, guiData);
 
-                    guiData.currentSave = file;
-                    LoadSettings(guiData.currentSave);
+                    std::string newName = "Profile " + std::to_string(saves.size() + 1);
+                    shadersData = ShadersData();
+                    guiData = GUIData();
+
+                    SaveSettings(newName, shadersData, guiData);
+                    guiData.currentSave = newName;
+                    saves = GetSaveList();
                 }
-                if (isSelected)
-                    ImGui::SetItemDefaultFocus();
+
+                ImGui::EndCombo();
             }
 
-            ImGui::Separator();
+            ImGui::PopStyleVar();
+            ImGui::PopItemWidth();
 
-            if (ImGui::Selectable("+ Add new profile")) {
-                if (guiData.currentSave != "default")
-                    SaveSettings(guiData.currentSave, shadersData, guiData);
+            ImGui::SameLine();
 
-                std::string newName = "Profile " + std::to_string(saves.size() + 1);
-
-                shadersData = ShadersData();
-                guiData = GUIData();
-
-                SaveSettings(newName, shadersData, guiData);
-                guiData.currentSave = newName;
-                saves = GetSaveList();
+            if (ImGui::Button("Delete save", ImVec2(buttonWidth, guiData.smallButtonSize))) {
             }
 
-            ImGui::EndCombo();
-        }
-        ImGui::PopStyleVar();
-        ImGui::PopItemWidth();
+            ImGui::SameLine();
 
-        ImGui::SameLine();
+            if (ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth, guiData.smallButtonSize))){
+                SaveTextureScreenshot();
+            }
 
-        if (ImGui::Button((std::string("Print Screen ") + ICON_FA_CAMERA).c_str(), ImVec2(buttonWidth - 10, guiData.buttonSize))) {
-            SaveTextureScreenshot();
+            ImGui::EndChild();
         }
 
-        ImGui::EndChild();
     }
 
     else {

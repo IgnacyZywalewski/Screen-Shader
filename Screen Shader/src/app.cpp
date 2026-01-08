@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "app.h"
+#include "screen_flips.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -27,6 +28,7 @@ LRESULT CALLBACK App::GUIWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPa
         DestroyWindow(hwnd);
         return 0;
     case WM_DESTROY:
+        normalScreen();
         PostQuitMessage(0);
         running = false;
         return 0;

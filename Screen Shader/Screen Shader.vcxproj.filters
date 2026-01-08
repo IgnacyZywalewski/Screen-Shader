@@ -75,6 +75,9 @@
     <ClInclude Include="library\include\stb_image_write.h">
       <Filter>library</Filter>
     </ClInclude>
+    <ClInclude Include="src\screen_flips.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -117,6 +120,9 @@
       <Filter>library</Filter>
     </ClCompile>
     <ClCompile Include="src\helpers.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\screen_flips.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

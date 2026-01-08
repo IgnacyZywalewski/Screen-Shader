@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="assets\icons_font_awesome_6.h" />
     <ClInclude Include="library\include\stb_image_write.h" />
+    <ClInclude Include="src\screen_flips.h" />
     <ClInclude Include="src\saves.h" />
     <ClInclude Include="src\pc_specs.h" />
     <ClInclude Include="src\data.h" />
@@ -39,6 +40,7 @@
     <ClInclude Include="src\renderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\screen_flips.cpp" />
     <ClCompile Include="src\data.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\backends\imgui_impl_win32.cpp" />

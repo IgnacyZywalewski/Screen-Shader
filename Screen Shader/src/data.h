@@ -74,11 +74,12 @@ struct GUIData {
     float titleBarHeight = 40.0f;
     float footerBarHeight = 50.0f;
 
-    float buttonSize = 25.0f;
+    float smallButtonSize = 25.0f;
+    float buttonSize = 75.0f;
     float labelWidth = 90.0f;
     float offset = 10.0f;
 
-    float sliderWidth = windowWidth - labelWidth - buttonSize - 45.0f;
+    float sliderWidth = windowWidth - labelWidth - smallButtonSize - 45.0f;
     float contentHeight = windowHeight - titleBarHeight - footerBarHeight;
 
     float baseFontSize = 13.0f;
