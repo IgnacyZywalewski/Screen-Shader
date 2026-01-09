@@ -1,7 +1,7 @@
-# Screen Shader Overlay
+# Screen Shader
 
 ## Project Description
-Screen Shader Overlay is a real-time screen post-processing application that applies various visual filters directly to your screen content. It allows users to enhance visuals, experiment with color grading, and apply artistic or accessibility-oriented effects on any application running on their desktop.
+Screen Shader is a real-time screen post-processing application that applies various visual filters directly to your screen content. It allows users to enhance visuals, experiment with color grading, and apply artistic or accessibility-oriented effects on any application running on their desktop.
 
 ## Technologies Used
 - **C++17** – Core application logic  
