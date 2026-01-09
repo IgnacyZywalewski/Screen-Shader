@@ -8,10 +8,10 @@
 
 class Renderer {
 public:
-    bool Init(HWND hwndOverlay, HWND hwndGUI, int width, int height);
+    bool Init(HWND hwndOverlay, int width, int height);
     void Update();
     void RenderOverlay();
-    void Close(HWND hwndOverlay, HWND hwndGUI);
+    void Close(HWND hwndOverlay);
 
     HGLRC GLContextOverlay = nullptr;
     HDC HDCOverlay = nullptr;

@@ -156,5 +156,8 @@
     <Font Include="assets\fa_solid_900.ttf">
       <Filter>assets</Filter>
     </Font>
+    <Font Include="assets\Inter-Regular.ttf">
+      <Filter>assets</Filter>
+    </Font>
   </ItemGroup>
 </Project>

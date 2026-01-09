@@ -9,9 +9,9 @@
 
 class GUI{
 public:
-    bool Init(HWND hwnd);
-    void Render(HWND hwnd);
-    void Close();
+    bool Init(HWND hwndGUI);
+    void Render(HWND hwndGUI);
+    void Close(HWND hwndGUI);
 
 private:
     HGLRC GLContextGUI = nullptr;

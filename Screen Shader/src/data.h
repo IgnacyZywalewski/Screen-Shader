@@ -67,7 +67,7 @@ struct ShadersData {
 struct GUIData {
     std::string currentSave;
 
-    float windowHeight = 550.0f;
+    float windowHeight = 600.0f;
     float windowWidth = 350.0f;
 
     float lastHeight = 0.0f;
@@ -82,8 +82,8 @@ struct GUIData {
     float sliderWidth = windowWidth - labelWidth - smallButtonSize - 45.0f;
     float contentHeight = windowHeight - titleBarHeight - footerBarHeight;
 
-    float baseFontSize = 13.0f;
-    float iconFontSize = baseFontSize * 2.0f / 3.0f;
+    float fontSize = 15.0f;
+    float iconFontSize = fontSize;
 
     bool nightMode = true;
     bool collapsed = false;

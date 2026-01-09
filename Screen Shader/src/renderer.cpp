@@ -20,7 +20,7 @@ std::string LoadShaderFromFile(const char* path) {
     return contents.str();
 }
 
-bool Renderer::Init(HWND hwndOverlay, HWND hwndGUI, int width, int height) {
+bool Renderer::Init(HWND hwndOverlay, int width, int height) {
     screenWidth = width;
     screenHeight = height;
 
@@ -428,7 +428,7 @@ void Renderer::CaptureScreenToBGR(std::vector<BYTE>& outPacked, int width, int h
 
 }
 
-void Renderer::Close(HWND hwndOverlay, HWND hwndGUI) {
+void Renderer::Close(HWND hwndOverlay) {
     wglMakeCurrent(HDCOverlay, GLContextOverlay);
 
     if (screenTexture)

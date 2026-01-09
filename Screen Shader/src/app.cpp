@@ -3,6 +3,7 @@
 
 #include "app.h"
 #include "screen_flips.h"
+#include "data.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -68,19 +69,22 @@ void App::Run() {
     wcGUI.lpfnWndProc = GUIWndProc;
     wcGUI.hInstance = hInstance;
     wcGUI.lpszClassName = GUI_CLASS;
+    wcGUI.hbrBackground = nullptr;
     RegisterClass(&wcGUI);
 
     hwndGUI = CreateWindowEx(
-        WS_EX_TOPMOST,
+        WS_EX_TOPMOST | WS_EX_LAYERED,
         GUI_CLASS, L"Screen Shader", WS_POPUP,
-        screenWidth / 2 + 300, screenHeight / 2 - 300, 350, 550,
+        screenWidth / 2 + 300, screenHeight / 2 - 300, (int)guiData.windowWidth, (int)guiData.windowHeight,
         nullptr, nullptr, hInstance, nullptr
     );
+    SetLayeredWindowAttributes(hwndGUI, 0, 0, LWA_COLORKEY);
     ShowWindow(hwndGUI, SW_SHOW);
+    UpdateWindow(hwndGUI);
     SetWindowDisplayAffinity(hwndGUI, WDA_EXCLUDEFROMCAPTURE);
 
 
-    if (!renderer.Init(hwndOverlay, hwndGUI, screenWidth, screenHeight)) {
+    if (!renderer.Init(hwndOverlay, screenWidth, screenHeight)) {
         MessageBox(hwndOverlay, L"Renderer init failed", L"Error", MB_OK);
         return;
     }
@@ -96,7 +100,8 @@ void App::Run() {
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            if (msg.message == WM_QUIT) running = false;
+            if (msg.message == WM_QUIT) 
+                running = false;
         }
 
         renderer.Update();
@@ -104,7 +109,6 @@ void App::Run() {
         gui.Render(hwndGUI);
     }
 
-    gui.Close();
-    renderer.Close(hwndOverlay, hwndGUI);
-
+    gui.Close(hwndGUI);
+    renderer.Close(hwndOverlay);
 }

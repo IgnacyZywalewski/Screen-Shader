@@ -10,10 +10,10 @@
 #include <filesystem>
 
 
-bool GUI::Init(HWND hwnd) {
+bool GUI::Init(HWND hwndGUI) {
     initThread();
-  
-    if (!InitOpenGL(hwnd, HDCGUI, GLContextGUI))
+
+    if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
         return false;
 
     if (!wglMakeCurrent(HDCGUI, GLContextGUI))
@@ -22,25 +22,41 @@ bool GUI::Init(HWND hwnd) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
-    ImGui_ImplWin32_Init(hwnd);
+
+    ImGui_ImplWin32_Init(hwndGUI);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    //czcionka
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+    ImFont* mainFont = io.Fonts->AddFontFromFileTTF("assets/Inter-Regular.ttf", guiData.fontSize);
+
+    if (!mainFont) {
+        io.Fonts->AddFontDefault();
+    }
 
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+
     ImFontConfig icons_config;
     icons_config.MergeMode = true;
     icons_config.PixelSnapH = true;
     icons_config.GlyphMinAdvanceX = guiData.iconFontSize;
-    io.Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_FAS, guiData.iconFontSize, &icons_config, icons_ranges);
+
+    io.Fonts->AddFontFromFileTTF("assets/fa_solid_900.ttf", guiData.iconFontSize, &icons_config, icons_ranges);
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.FrameRounding = 3.0f;
+    style.WindowRounding = 6.0f;
+    style.GrabRounding = 4.0f;
+    style.ScrollbarRounding = 6.0f;
 
     return true;
 }
 
-void GUI::Render(HWND hwnd) {
+
+void GUI::Render(HWND hwndGUI) {
     wglMakeCurrent(HDCGUI, GLContextGUI);
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -68,14 +84,14 @@ void GUI::Render(HWND hwnd) {
             POINT p;
             GetCursorPos(&p);
             RECT r;
-            GetWindowRect(hwnd, &r);
+            GetWindowRect(hwndGUI, &r);
             dragOffset.x = p.x - r.left;
             dragOffset.y = p.y - r.top;
         }
         if (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0)) {
             POINT p;
             GetCursorPos(&p);
-            SetWindowPos(hwnd, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+            SetWindowPos(hwndGUI, nullptr, p.x - dragOffset.x, p.y - dragOffset.y, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
         }
 
         //collapse
@@ -110,7 +126,7 @@ void GUI::Render(HWND hwnd) {
         ImGui::SameLine();
 
         if (ImGui::Button(ICON_FA_WINDOW_MINIMIZE, ImVec2(guiData.smallButtonSize, guiData.smallButtonSize))) 
-            ShowWindow(hwnd, SW_MINIMIZE);
+            ShowWindow(hwndGUI, SW_MINIMIZE);
 
         ImGui::SameLine();
 
@@ -132,7 +148,7 @@ void GUI::Render(HWND hwnd) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameColorBlindness = false;
         }
-        if (ImGui::CollapsingHeader("Color blindess correction")) {
+        if (ImGui::CollapsingHeader("Color blindness correction")) {
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Protanopia - Red");
@@ -202,17 +218,17 @@ void GUI::Render(HWND hwnd) {
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Protanopia - Red");
-            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::SameLine(guiData.labelWidth + 110);
             ImGui::Checkbox("##simulate_protanopia_checkbox", &shadersData.simulateProtanopia);
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Deuteranopia - Green");
-            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::SameLine(guiData.labelWidth + 110);
             ImGui::Checkbox("##simulate_deuteranopia_checkbox", &shadersData.simulateDeuteranopia);
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Simulate Tritanopia - Blue");
-            ImGui::SameLine(guiData.labelWidth + 130);
+            ImGui::SameLine(guiData.labelWidth + 110);
             ImGui::Checkbox("##simulate_tritanopia_checkbox", &shadersData.simulateTritanopia);
 
             ImGui::NewLine();
@@ -224,33 +240,33 @@ void GUI::Render(HWND hwnd) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameScreenFlips = false;
         }
-        if (ImGui::CollapsingHeader("Screen Filps")) {
+        if (ImGui::CollapsingHeader("Screen rotations and flips ")) {
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Rotate screen 90 right");
-            ImGui::SameLine(guiData.labelWidth + 80);
-            if (ImGui::Button("Rotate##rotate_90_right_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+            ImGui::SameLine(guiData.labelWidth + 70);
+            if (ImGui::Button("Rotate##rotate_90_right_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate90right();
             }
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Rotate screen 90 left");
-            ImGui::SameLine(guiData.labelWidth + 80);
-            if (ImGui::Button("Rotate##rotate_90_left_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+            ImGui::SameLine(guiData.labelWidth + 70);
+            if (ImGui::Button("Rotate##rotate_90_left_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate90left();
             }
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Rotate screen 180");
-            ImGui::SameLine(guiData.labelWidth + 80);
-            if (ImGui::Button("Rotate##rotate_180_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+            ImGui::SameLine(guiData.labelWidth + 70);
+            if (ImGui::Button("Rotate##rotate_180_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate180();
             }
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Normal");
-            ImGui::SameLine(guiData.labelWidth + 80);
-            if (ImGui::Button("Normal##normal_screen_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize - 8.0f))) {
+            ImGui::SameLine(guiData.labelWidth + 70);
+            if (ImGui::Button("Normal##normal_screen_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 normalScreen();
             }
 
@@ -258,12 +274,12 @@ void GUI::Render(HWND hwnd) {
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Horizontal Swap (visual)");
-            ImGui::SameLine(guiData.labelWidth + 80);
+            ImGui::SameLine(guiData.labelWidth + 70);
             ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Vertical Swap (visual)");
-            ImGui::SameLine(guiData.labelWidth + 80);
+            ImGui::SameLine(guiData.labelWidth + 70);
             ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
 
 
@@ -630,8 +646,9 @@ void GUI::Render(HWND hwnd) {
 
 
         // footer
+        ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
         {
-            ImGui::BeginChild("Footer", ImVec2(0, guiData.footerBarHeight), false, ImGuiWindowFlags_NoScrollWithMouse);
+            
             ImGui::Separator();
 
             float centerY = (guiData.footerBarHeight - guiData.smallButtonSize - ImGui::GetStyle().ItemSpacing.y) / 2;
@@ -725,14 +742,14 @@ void GUI::Render(HWND hwnd) {
     ImVec2 imguiSize = ImGui::GetWindowSize();
     if (!guiData.collapsed) {
         SetWindowPos(
-            hwnd, nullptr, 0, 0,
+            hwndGUI, nullptr, 0, 0,
             (int)imguiSize.x, (int)imguiSize.y,
             SWP_NOMOVE | SWP_NOZORDER
         );
     }
     else {
         SetWindowPos(
-            hwnd, nullptr, 0, 0,
+            hwndGUI, nullptr, 0, 0,
             (int)imguiSize.x, (int)guiData.titleBarHeight,
             SWP_NOMOVE | SWP_NOZORDER
         );
@@ -746,7 +763,7 @@ void GUI::Render(HWND hwnd) {
     
 }
 
-void GUI::Close() {
+void GUI::Close(HWND hwndGUI) {
     closeThread();
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
@@ -760,5 +777,5 @@ void GUI::Close() {
         wglDeleteContext(GLContextGUI);
 
     if (HDCGUI)
-        ReleaseDC(nullptr, HDCGUI);
+        ReleaseDC(hwndGUI, HDCGUI);
 }
