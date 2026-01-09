@@ -235,7 +235,7 @@ void GUI::Render(HWND hwndGUI) {
         }
 
 
-        //odwrocenia ekranu
+        //obroty ekranu
         if (guiData.firstFrameScreenFlips) {
             ImGui::SetNextItemOpen(true);
             guiData.firstFrameScreenFlips = false;
@@ -243,29 +243,29 @@ void GUI::Render(HWND hwndGUI) {
         if (ImGui::CollapsingHeader("Screen rotations and flips ")) {
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Rotate screen 90 right");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::Text(u8"Rotate screen 90° to right");
+            ImGui::SameLine(guiData.labelWidth + 80);
             if (ImGui::Button("Rotate##rotate_90_right_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate90right();
             }
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Rotate screen 90 left");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::Text(u8"Rotate screen 90° to left");
+            ImGui::SameLine(guiData.labelWidth + 80);
             if (ImGui::Button("Rotate##rotate_90_left_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate90left();
             }
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Rotate screen 180");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::Text(u8"Rotate screen 180°");
+            ImGui::SameLine(guiData.labelWidth + 80);
             if (ImGui::Button("Rotate##rotate_180_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 rotate180();
             }
 
             ImGui::AlignTextToFramePadding();
-            ImGui::Text("Normal");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::Text("Normal screen orientation");
+            ImGui::SameLine(guiData.labelWidth + 80);
             if (ImGui::Button("Normal##normal_screen_button", ImVec2(guiData.buttonSize - 20.0f, guiData.smallButtonSize))) {
                 normalScreen();
             }
@@ -274,12 +274,12 @@ void GUI::Render(HWND hwndGUI) {
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Horizontal Swap (visual)");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::SameLine(guiData.labelWidth + 80);
             ImGui::Checkbox("##horizontal_swap_checkbox", &shadersData.horizontalSwap);
 
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Vertical Swap (visual)");
-            ImGui::SameLine(guiData.labelWidth + 70);
+            ImGui::SameLine(guiData.labelWidth + 80);
             ImGui::Checkbox("##vertical_swap_checkbox", &shadersData.verticalSwap);
 
 

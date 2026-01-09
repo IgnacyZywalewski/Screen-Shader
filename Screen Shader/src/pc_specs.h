@@ -224,5 +224,3 @@ void closeThread() {
         g_adapter3 = nullptr;
     }
 }
-
-
