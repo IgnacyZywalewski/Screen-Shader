@@ -131,26 +131,27 @@ bool Renderer::Init(HWND hwndOverlay, int width, int height) {
 }
 
 void Renderer::Update() {
-    static ULONGLONG lastCapture = GetTickCount64();
-    const ULONGLONG captureInterval = 2;
+    //static ULONGLONG lastCapture = GetTickCount64();
+    //const ULONGLONG captureInterval = 2;
     ULONGLONG now = GetTickCount64();
 
-    if (now - lastCapture >= captureInterval) {
-        lastCapture = now;
+    //if (now - lastCapture >= captureInterval) {
+        //lastCapture = now;
 
-        shadersData.shaderTime = now / 1000.0f;
+    shadersData.shaderTime = now / 1000.0f;
 
-        CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
+    CaptureScreenToBGR(screenPacked, screenWidth, screenHeight);
 
-        if (wglMakeCurrent(HDCOverlay, GLContextOverlay)) {
-            if (screenTexture != 0) {
-                glBindTexture(GL_TEXTURE_2D, screenTexture);
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, screenWidth, screenHeight, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-            }
+
+    if (wglMakeCurrent(HDCOverlay, GLContextOverlay)) {
+        if (screenTexture != 0) {
+            glBindTexture(GL_TEXTURE_2D, screenTexture);
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, screenWidth, screenHeight, GL_BGR, GL_UNSIGNED_BYTE, screenPacked.data());
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         }
     }
+    //}
 }
 
 void Renderer::RenderOverlay() {
@@ -433,19 +434,37 @@ void Renderer::Close(HWND hwndOverlay) {
 
     if (screenTexture)
         glDeleteTextures(1, &screenTexture);
+    if (colorBlindnessTexture)
+        glDeleteTextures(1, &colorBlindnessTexture);
+    if (sharpnessTexture)
+        glDeleteTextures(1, &sharpnessTexture);
+    if (pixelateTexture)
+        glDeleteTextures(1, &pixelateTexture);
+    if (kuwaharaTexture)
+        glDeleteTextures(1, &kuwaharaTexture);
     if (dogTexture)
         glDeleteTextures(1, &dogTexture);
     if (blurTexture)
         glDeleteTextures(1, &blurTexture);
     
     glDeleteProgram(shaderProgram);
+    glDeleteProgram(colorBlindnessShaderProgram);
+    glDeleteProgram(sharpnessShaderProgram);
+    glDeleteProgram(pixelateShaderProgram);
+    glDeleteProgram(kuwaharaShaderProgram);
     glDeleteProgram(dogShaderProgram);
     glDeleteProgram(blurShaderProgram);
     
+    glDeleteFramebuffers(1, &colorBlindnessFbo);
+    glDeleteFramebuffers(1, &sharpnessFbo);
+    glDeleteFramebuffers(1, &pixelateFbo);
+    glDeleteFramebuffers(1, &kuwaharaFbo);
+    glDeleteFramebuffers(1, &blurFbo);
+    glDeleteFramebuffers(1, &dogFbo);
+
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
     glDeleteVertexArrays(1, &VAO);
-    glDeleteFramebuffers(1, &blurFbo);
     
     wglMakeCurrent(NULL, NULL);
 
