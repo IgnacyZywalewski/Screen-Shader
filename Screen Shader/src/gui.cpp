@@ -11,13 +11,13 @@
 
 
 bool GUI::Init(HWND hwndGUI) {
-    initThread();
+    InitThread();
 
     if (!InitOpenGL(hwndGUI, HDCGUI, GLContextGUI))
         return false;
 
-    if (!wglMakeCurrent(HDCGUI, GLContextGUI))
-        return false;
+    //if (!wglMakeCurrent(HDCGUI, GLContextGUI))
+    //    return false;
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -636,7 +636,7 @@ void GUI::Render(HWND hwndGUI) {
             ImGui::Separator();
             ImGui::NewLine();
             
-            ImGui::Text("GPU: %s", GetGPUName().c_str());
+            //ImGui::Text("GPU: %s", GetGPUName().c_str());
             ImGui::Text("OpenGL version: %s", GetOpenGLVersion());
 
             ImGui::NewLine();
@@ -764,7 +764,7 @@ void GUI::Render(HWND hwndGUI) {
 }
 
 void GUI::Close(HWND hwndGUI) {
-    closeThread();
+    CloseThread();
 
     wglMakeCurrent(HDCGUI, GLContextGUI);
     ImGui_ImplOpenGL3_Shutdown();

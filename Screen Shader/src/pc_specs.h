@@ -3,18 +3,18 @@
 #include <string>
 #include <thread>
 #include <atomic>
+#include <vector>
 #include "psapi.h"
 
 #include "pdh.h"
-#include <dxgi1_4.h>
+//#include <dxgi1_4.h>
 
-#include <vector>
 
 static PDH_HQUERY cpuQuery;
 static PDH_HCOUNTER cpuTotal;
 static PDH_HQUERY diskQuery;
 static PDH_HCOUNTER diskTotal;
-static IDXGIAdapter3* g_adapter3 = nullptr;
+//static IDXGIAdapter3* g_adapter3 = nullptr;
 
 std::atomic<double> g_CPUUsage(0.0);
 std::atomic<double> g_CPUProcessUsage(0.0);
@@ -94,7 +94,8 @@ double GetCPUProcessUsage() { return g_CPUProcessUsage.load(); }
 
 double GetRAM() {
     MEMORYSTATUSEX memInfo{ sizeof(memInfo) };
-    if (GlobalMemoryStatusEx(&memInfo)) return memInfo.ullTotalPhys / 1024.0 / 1024.0 / 1024.0;
+    if (GlobalMemoryStatusEx(&memInfo)) 
+        return memInfo.ullTotalPhys / 1024.0 / 1024.0 / 1024.0;
     return 0;
 }
 double GetRAMUsage() { return g_RAMUsage.load(); }
@@ -106,34 +107,35 @@ double GetDiskTotalGB() { return g_DiskTotalGB.load(); }
 double GetDiskUsedGB() { return g_DiskUsedGB.load(); }
 
 
-std::string GetGPUName() {
-    IDXGIFactory* factory = nullptr;
-    IDXGIAdapter* adapter = nullptr;
+//std::string GetGPUName() {
+//    IDXGIFactory* factory = nullptr;
+//    IDXGIAdapter* adapter = nullptr;
+//
+//    if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory)))
+//        return "Unknown GPU";
+//
+//    if (factory->EnumAdapters(0, &adapter) != S_OK) {
+//        factory->Release();
+//        return "Unknown GPU";
+//    }
+//
+//    DXGI_ADAPTER_DESC desc;
+//    adapter->GetDesc(&desc);
+//
+//    adapter->Release();
+//    factory->Release();
+//
+//    std::wstring wname(desc.Description);
+//    if (wname.empty()) 
+//        return "Unknown GPU";
+//
+//    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), nullptr, 0, nullptr, nullptr);
+//    std::string name(size_needed, 0);
+//    WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), &name[0], size_needed, nullptr, nullptr);
+//
+//    return name;
+//}
 
-    if (FAILED(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory)))
-        return "Unknown GPU";
-
-    if (factory->EnumAdapters(0, &adapter) != S_OK) {
-        factory->Release();
-        return "Unknown GPU";
-    }
-
-    DXGI_ADAPTER_DESC desc;
-    adapter->GetDesc(&desc);
-
-    adapter->Release();
-    factory->Release();
-
-    std::wstring wname(desc.Description);
-    if (wname.empty()) 
-        return "Unknown GPU";
-
-    int size_needed = WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), nullptr, 0, nullptr, nullptr);
-    std::string name(size_needed, 0);
-    WideCharToMultiByte(CP_UTF8, 0, wname.c_str(), (int)wname.size(), &name[0], size_needed, nullptr, nullptr);
-
-    return name;
-}
 const char* GetOpenGLVersion() {
     const char* version = (const char*)glGetString(GL_VERSION);
     return version;
@@ -188,7 +190,7 @@ void MonitorThread() {
 }
 
 
-void initThread() {
+void InitThread() {
     g_Running = true;
 
     // CPU systemu
@@ -207,7 +209,7 @@ void initThread() {
     thread = std::thread(MonitorThread);
 }
 
-void closeThread() {
+void CloseThread() {
     g_Running = false;
 
     if (thread.joinable()) 
@@ -219,8 +221,8 @@ void closeThread() {
     if (diskQuery) 
         PdhCloseQuery(diskQuery);
 
-    if (g_adapter3) {
+    /*if (g_adapter3) {
         g_adapter3->Release();
         g_adapter3 = nullptr;
-    }
+    }*/
 }

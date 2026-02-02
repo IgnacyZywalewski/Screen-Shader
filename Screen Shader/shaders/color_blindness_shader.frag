@@ -50,9 +50,9 @@ void simulateProtanopia(inout vec3 color) {
     );
 
     vec3 lmsProtan = protanMatrix * lms;
-    vec3 lmsFinal = mix(lms, lmsProtan, 1.0);
+    //vec3 lmsFinal = mix(lms, lmsProtan, 1.0);
 
-    color = lms2rgb(lmsFinal);
+    color = lms2rgb(lmsProtan);
     color = clamp(color, 0.0, 1.0);
 }
 
@@ -70,9 +70,9 @@ void daltonizeProtanopia(inout vec3 color) {
     vec3 error = lms - lmsProtan;
 
     mat3 correction = mat3(
-        0.0, 0.0, 0.7,
-        0.7, 1.0, 0.0,
-        0.7, 0.0, 1.0
+        0.0, 0.7, 0.7,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0
     );
 
     vec3 lmsDaltonized = lms + correction * (protanopiaStrength * error);
@@ -92,9 +92,9 @@ void simulateDeuteranopia(inout vec3 color) {
     );
 
     vec3 lmsDetuer = deuterMatrix * lms;
-    vec3 lmsFinal = mix(lms, lmsDetuer, 1.0);
+    //vec3 lmsFinal = mix(lms, lmsDetuer, 1.0);
 
-    color = lms2rgb(lmsFinal);
+    color = lms2rgb(lmsDetuer);
     color = clamp(color, 0.0, 1.0);
 }
 
@@ -112,7 +112,7 @@ void daltonizeDeuteranopia(inout vec3 color) {
     vec3 error = lms - lmsDetuer;
 
     mat3 correction = mat3(
-        1.0, 0.0, 1.0,
+        1.0, 0.0, 0.0,
         0.7, 0.0, 0.7,
         0.0, 0.0, 1.0
     );
@@ -134,9 +134,9 @@ void simulateTritanopia(inout vec3 color) {
     );
 
     vec3 lmsTrit = tritMatrix * lms;
-    vec3 lmsFinal = mix(lms, lmsTrit, 1.0);
+    //vec3 lmsFinal = mix(lms, lmsTrit, 1.0);
 
-    color = lms2rgb(lmsFinal);
+    color = lms2rgb(lmsTrit);
     color = clamp(color, 0.0, 1.0);
 }
 

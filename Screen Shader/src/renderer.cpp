@@ -27,8 +27,8 @@ bool Renderer::Init(HWND hwndOverlay, int width, int height) {
     if (!InitOpenGL(hwndOverlay, HDCOverlay, GLContextOverlay))
         return false;
 
-    if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
-        return false;
+    //if (!wglMakeCurrent(HDCOverlay, GLContextOverlay))
+    //    return false;
 
     if (!gladLoadGL())
         return false;
